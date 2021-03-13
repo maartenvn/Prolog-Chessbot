@@ -38,6 +38,23 @@ upstream opgave repo).
 Met de "driemaal dezelfde stelling", de "50 zetten regel" en de "75 halve
 zetten" regel hoef je geen rekening te houden.
 
+## Oproepen van je schaakcomputer
+
+Je schaakcomputer moet werken als ze wordt uitgevoerd met volgende opdracht:
+
+```
+cat inputBord | swipl -f -q -t "halt(1)" -O main.pl
+```
+
+Waarbij `inputBord` een utf8 unicode tekstbestand is met daarin de "Unicode
+Schaakbord Notatie" van een input bord (zie verder).
+
+De test functie zal worden opgeroepen met:
+
+```
+cat inputBord | swipl -f -q -t "halt(1)" -O main.pl TEST
+```
+
 ## Niet functionele eisen
 
 Naast de basisfunctionaliteit vragen we enkele niet functionele eisen waar je
@@ -163,7 +180,8 @@ door een dame, paard, loper of toren. Meestal wordt er gekozen voor een dame.
 ## Unicode Schaakbord Notatie
 
 We zullen borden voorstellen als een unicode raster. Een start schaakbord ziet
-er als volgt uit:
+er als volgt uit, we gebruiken de conventie dat zwart altijd diens koning op
+lijn 8 heeft staan in het begin.
 
 ```
 8 ♜♞♝♛♚♝♞♜ [♛♚]
@@ -356,6 +374,6 @@ pushen naar master als je wilt, we raden je ook aan geregeld te pushen.
 
 Als je vragen hebt over de opgave of problemen ondervindt, dan kun je je vraag
 stellen via het forum. Contacteer je ons per mail, stuur dan ook je
-studentennummer en
+studentennummer (dan kunnen we gemakkelijk je code clonen) en een
 "[minimal breaking example](https://stackoverflow.com/help/minimal-reproducible-example)".
 Stuur geen screenshots van code.
