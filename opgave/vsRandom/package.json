@@ -1,0 +1,18 @@
+{
+  "name": "prolog-chess-tests",
+  "version": "1.0.0",
+  "description": "Test code voor het project logisch programmeren",
+  "main": "TestEngine.js",
+  "scripts": {
+    "start": "node TestEngine.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.ugent.be:chscholl/prolog-chess-tests.git"
+  },
+  "keywords": [
+    "prolog"
+  ],
+  "author": "Christophe Scholliers",
+  "license": "ISC"
+}
