@@ -21,11 +21,11 @@ maximum 30 seconden per zet (harde limit van 120 seconden voor 1 zet).
 
 Een basistest van je schaakcomputer is hem te laten spelen tegen een random
 speler. We voorzien in de upstream opgave repo code om je schaakcomputer een
-spel te laten spelen tegen een random speler. Die testcode gaat tijdens het
-spelen ook na of je schaakcomputer steeds legale zetten maakt. Indien je
-schaakcomputer een illegale zet maakt zul je hiervan op de hoogte gesteld
-worden. Schaakcomputers die niet in staat zijn om tegen deze random speler te
-spelen zullen niet aanvaard worden.
+spel te laten spelen tegen een random speler (`opgave/vsRandom`). Die testcode
+gaat tijdens het spelen ook na of je schaakcomputer steeds legale zetten maakt.
+Indien je schaakcomputer een illegale zet maakt zul je hiervan op de hoogte
+gesteld worden. Schaakcomputers die niet in staat zijn om tegen deze random
+speler te spelen zullen niet aanvaard worden.
 
 Je programma moet ook een test modus hebben waarbij alle mogelijke volgende
 borden naar standaard uitvoer worden geschreven, gescheiden door `"\n~\n"`. Deze
@@ -305,7 +305,7 @@ git pull upstream master
 ```
 
 Je kunt de laatste versie van de opgave afhalen met `git pull upstream master`.
-Als je geen wijzigingen hebt aangebracht aan de opgave map zou die pull steeds
+Als je geen wijzigingen hebt aangebracht aan de `opgave` map zou die pull steeds
 zonder problemen moeten verlopen.
 
 ### Feedback
