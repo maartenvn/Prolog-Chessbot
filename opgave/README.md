@@ -341,7 +341,7 @@ git clone git@subgit.ugent.be:2020-2021/LP/{studentnr} projectLPControle
 
 ## Deadlines
 
-Na **2021-06-21 om 13:37:42** kun je geen wijzigingen meer aanbrengen aan je
+Na **2021-06-18 om 23:23:23** kun je geen wijzigingen meer aanbrengen aan je
 SubGIT repo. De code in de `src` map, de testen in de `test` map en het verslag
 in `extra/verslag.pdf` zijn je finale indiening. Voor de deadline kun je zo veel
 pushen naar master als je wilt, we raden je ook aan geregeld te pushen.
