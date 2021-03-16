@@ -84,6 +84,7 @@ zijn minst de volgende onderdelen:
 - Inleiding
 - Interne Bord voorstelling
 - Algoritme (met kort voorbeeld)
+- Benchmarks (voor verschillende recursiedieptes)
 - Conclusie (wat heb je gerealiseerd en wat kan beter)
 
 ## Checklist
