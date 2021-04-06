@@ -88,7 +88,7 @@ function decode(ascii) {
   return [
     board,
     statusW.includes("☚") ? "w" : "b",
-    rok,
+    rok || "-",
     (statusW + statusB).replace(/[^a-z0-9]/g, "") || "-",
   ].join(" ");
 }
