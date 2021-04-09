@@ -1,74 +1,106 @@
 :- use_module(library(pio)).
 :- use_module(library(dcg/basics)).
-:- set_prolog_flag(double_quotes,codes).
+:- set_prolog_flag(double_quotes, codes).
 
-%! board(-Board)
+test :-
+    phrase_from_file(parse_board(Board), "test_chars.txt", [encoding(utf8),type(text)]),
+    write(Board).
+
+%! parse_board(-Board)
 %
 % Parse a chess board.
-board(Board) --> 
-    row(Board).
+parse_board(Board) --> 
+    parse_rows(Rows),
 
-%! row(-Y, -Positions)
+    {
+        % Flatten the rows into a single list of positions
+        flatten(Rows, Board)
+    }.
+
+
+%! parse_rows(-Positions)
+%
+% Parse all rows in a flat list of board positions.
+parse_rows([Row | Rows]) -->
+    parse_row(Row), !,
+    parse_rows(Rows).
+
+% TODO: ask if this is what should happen, rather than in a higher function.
+parse_rows([]) --> []. % [].
+
+%! parse_row(-Y, -Positions)
 %
 % Parse a row of the chess board.
-row(Positions) --> 
-    row_number(Y),
-    space,
-    pieces(0/Y, Positions),
-    newline.
+parse_row(Positions) --> 
+    parse_row_number(Y),
+    parse_space,
+    parse_pieces(0/Y, Positions).
+    
 
-
-%! row_number(+NumberCode)
+%! parse_row_number(+NumberCode)
 %
 % Parse a row number between 1 and 8.
-row_number(NumberCode) --> 
+parse_row_number(NumberCode) --> 
     [Number],
 
     {
-        number_codes(NumberCode, Number)
+        number_codes(NumberCode, [Number])
     }.
 
-%! space()
+%! parse_space()
 %
 % Parse a single space.
-space --> [" "].
+parse_space --> " ".
 
-%! newline()
+
+%! parse_newline()
 %
 % Parse a single newline.
-newline --> ["\n"].
+parse_newline --> "\n".
 
-%! pieces(-Pieces)
+
+%! parse_pieces(-Pieces)
 %
 % Parse a row of pieces.
-pieces(X/Y, []) --> [].
-pieces(X/Y, [Piece|Pieces]) -->
+% Will stop parsing when a newline is detected
+
+% Piece: taken position
+parse_pieces(X/Y, [Piece|Pieces]) -->
+    {
+        XNext is X + 1,
+        Piece = piece(Color, Type, XNext/Y)
+    },
+
+    parse_piece(Color, Type), !,
+    parse_pieces(XNext/Y, Pieces).
+
+% Space: empty position
+parse_pieces(X/Y, Pieces) -->
     {
         XNext is X + 1
     },
 
-    piece(Color, Type),
-    pieces(XNext/Y, Pieces),
+    parse_space,
+    parse_pieces(XNext/Y, Pieces).
 
-    {
-        Piece = piece(Color, Type, XNext/Y)
-    }.
+% Stop parsing when a newline is detected
+% TODO: ask if this is what should happen, rather than newline in the main function.
+parse_pieces(_, []) --> "\n".
 
-%! piece(-Color, -Type)
+
+%! parse_piece(-Color, -Type)
 %
 % Parse a single piece.
-piece(white, king)   --> ["\u2654"]. % White king
-piece(white, queen)  --> ["\u2655"]. % White queen
-piece(white, tower)  --> ["\u2656"]. % White tower
-piece(white, bishop) --> ["\u2657"]. % White tower
-piece(white, bishop) --> ["\u2658"]. % White horse
-piece(white, pawn)   --> ["\u2659"]. % White pawn
+parse_piece(white, king)   --> "\u2654", !. % White king
+parse_piece(white, queen)  --> "\u2655", !. % White queen
+parse_piece(white, tower)  --> "\u2656", !. % White tower
+parse_piece(white, bishop) --> "\u2657", !. % White tower
+parse_piece(white, bishop) --> "\u2658", !. % White horse
+parse_piece(white, pawn)   --> "\u2659", !. % White pawn
 
-piece(black, king)   --> ["\u265A"]. % Black king
-piece(black, queen)  --> ["\u265B"]. % Black queen
-piece(black, tower)  --> ["\u265C"]. % Black tower
-piece(black, bishop) --> ["\u265D"]. % Black tower
-piece(black, bishop) --> ["\u265E"]. % Black horse
-piece(black, pawn)   --> ["\u265F"]. % Black pawn
-
-piece(none, none)    --> space.      % Empty position
+parse_piece(black, king)   --> "\u265A", !. % Black king
+parse_piece(black, queen)  --> "\u265B", !. % Black queen
+parse_piece(black, tower)  --> "\u265C", !. % Black tower
+parse_piece(black, bishop) --> "\u265D", !. % Black tower
+parse_piece(black, bishop) --> "\u265E", !. % Black horse
+parse_piece(black, pawn)   --> "\u265F", !. % Black pawn
