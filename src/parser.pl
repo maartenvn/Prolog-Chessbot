@@ -11,6 +11,7 @@ test :-
 % Parse a chess board.
 parse_board(Board) --> 
     parse_rows(Rows),
+    parse_final_row,
 
     {
         % Flatten the rows into a single list of positions
@@ -24,9 +25,8 @@ parse_board(Board) -->
 parse_rows([Row | Rows]) -->
     parse_row(Row), !,
     parse_rows(Rows).
+parse_rows([]) --> [].
 
-% TODO: ask if this is what should happen, rather than in a higher function.
-parse_rows([]) --> []. % [].
 
 %! parse_row(-Y, -Positions)
 %
@@ -35,17 +35,22 @@ parse_row(Positions) -->
     parse_row_number(Y),
     parse_space,
     parse_pieces(0/Y, Positions).
+
+
+%! parse_final_row()
+%
+% Parse the final row of the board.
+% This row does not contain any extra information.
+parse_final_row --> 
+    parse_space,
+    parse_space,
+    "abcdefgh". 
     
 
-%! parse_row_number(+NumberCode)
+%! parse_row_number(+RowNumber)
 %
 % Parse a row number between 1 and 8.
-parse_row_number(NumberCode) --> 
-    [Number],
-
-    {
-        number_codes(NumberCode, [Number])
-    }.
+parse_row_number(RowNumber) --> integer(RowNumber).
 
 %! parse_space()
 %
