@@ -2,9 +2,6 @@
 :- use_module(library(dcg/basics)).
 :- set_prolog_flag(double_quotes, codes).
 
-test :-
-    phrase_from_file(parse_board(Board), "test_chars.txt", [encoding(utf8),type(text)]),
-    write(Board).
 
 %! parse_board(-Board)
 %
@@ -34,7 +31,8 @@ parse_rows([]) --> [].
 parse_row(Positions) --> 
     parse_row_number(Y),
     parse_space,
-    parse_pieces(0/Y, Positions).
+    parse_pieces(0/Y, Positions),
+    parse_newline.
 
 
 %! parse_final_row()
@@ -87,10 +85,7 @@ parse_pieces(X/Y, Pieces) -->
 
     parse_space,
     parse_pieces(XNext/Y, Pieces).
-
-% Stop parsing when a newline is detected
-% TODO: ask if this is what should happen, rather than newline in the main function.
-parse_pieces(_, []) --> "\n".
+parse_pieces(_, []) --> [].
 
 
 %! parse_piece(-Color, -Type)
