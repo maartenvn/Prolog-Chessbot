@@ -5,50 +5,107 @@
 :- set_prolog_flag(double_quotes, codes).
 
 test :-
-    phrase_from_file(parse_board(Board), "test_chars.txt", [encoding(utf8),type(text)]),
-    write(Board).
+    phrase_from_file(parse_rows(Pieces, Rokades, StartColor), "test_chars.txt", [encoding(utf8),type(text)]),
+    write(Pieces),
+    write(Rokades),
+    write(StartColor).
 
-%! parse_board(-Board)
+%! parse_board(-Board, -Rokades, -StartColor)
 %
 %  Parse a chess board.
-parse_board(Board) --> 
-    parse_rows(8, Board),
+parse_board(Board, Rokades, StartColor) --> 
+    parse_rows(Board, Rokades, StartColor),
     parse_final_row.
 
 
-%! parse_rows(-Positions)
+%! parse_rows(-Pieces)
 %
 %  Parse all rows in a flat list of board positions.
-parse_rows(Y, Rows) -->
-    {        
-        YNext is Y - 1,
-
-        % Y must be a valid Y-value
-        % (this is here to allow for re-using the parser as output writer)
-        between(1, 8, Y), !
-    },
-
-    % Parser the row
-    parse_row(Y, Row), !,
-
-    % Recursive call
-    parse_rows(YNext, RowRest),
-
-    % Append the row to the rows list
-    % TODO: ask if this could be done without append (maybe some prolog grammer?)
+%  TODO: this could be cleaned up by a recursive statement
+parse_rows(Pieces, Rokades, StartColor) -->
+    parse_border_row(8, PiecesRow8, RokadesBlack, StartColor),
+    parse_row(7, PiecesRow7),
+    parse_row(6, PiecesRow6),
+    parse_row(5, PiecesRow5),
+    parse_row(4, PiecesRow4),
+    parse_row(3, PiecesRow3),
+    parse_row(2, PiecesRow2),
+    parse_border_row(1, PiecesRow1, RokadesWhite, StartColor),
     {
-        append([Row, RowRest], Rows)
+        % Merge rokades
+        append([RokadesBlack, RokadesWhite], Rokades),
+
+        % Merge pieces
+        append([PiecesRow1, PiecesRow2, PiecesRow3, PiecesRow4, PiecesRow5, PiecesRow6, PiecesRow7, PiecesRow8], Pieces)
     }.
-parse_rows(_, []) --> [].
+
 
 %! parse_row(-Y, -Pieces)
 %
 %  Parse a row of the chess board.
+%  Will not parse the first/last row
 parse_row(Y, Pieces) --> 
     parse_row_number(Y),
     parse_space,
     parse_pieces(1/Y, Pieces),
     parse_newline, !.
+
+
+%! parse_border_row(-Y, -Pieces, -Rokades, -StartColor)
+%
+%  Parse the first/last row of the chess board.
+parse_border_row(Y, Pieces, Rokades, StartColor) -->
+    parse_row_number(Y),
+    parse_space,
+    parse_pieces(1/Y, Pieces),
+    parse_space,
+    parse_rokades(Rokades),
+    parse_current_player(Y, StartColor),
+    parse_newline.
+
+
+%! parse_rokades(-Rokades)
+%
+%  Parse a rokade notation.
+parse_rokades(Rokades) -->
+    "[",
+    parse_rokade_piece(LongRokades),
+    parse_rokade_piece(ShortRokades),
+    {
+        % Merge short & long rokades
+        append([LongRokades, ShortRokades], Rokades)
+    },
+    "]".
+
+%! parse_rokade_piece(-Rokades)
+%
+%  Parse a single piece of the rokade notation or a space.
+parse_rokade_piece([Rokade]) --> % Large
+    parse_piece(Color, queen),
+
+    % Create the rokade
+    {
+        Rokade = rokade(Color, large)
+    }, !.
+
+parse_rokade_piece([Rokade]) --> % Short
+    parse_piece(Color, king),
+
+    % Create the rokade
+    {
+        Rokade = rokade(Color, small)
+    }, !.
+
+parse_rokade_piece(_) --> % Space
+    parse_space, !.
+
+
+%! parse_current_player(+Y, -StartColor)
+%
+%  Parse a current player symbol or nothing
+parse_current_player(8, black) --> "☚", !.
+parse_current_player(1, white) --> "☚", !.
+parse_current_player(_, _)     --> "", !.
 
 
 %! parse_final_row()
