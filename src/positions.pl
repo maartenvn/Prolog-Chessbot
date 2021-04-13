@@ -17,30 +17,28 @@ checkmate(Board, Color) :-
     % Possible moves for the king
     possible_moves(KingPiece, Board, KingMoves),
 
-    write(KingMoves),
-
     checkmate(KingPiece, Board, OpponentPieces, KingMoves).
 
 %! checkmate(+KingPiece, +Board, +OpponentPieces, +Moves)
 %
 % If the given king is checkmate for the given set of opponent pieces and the given set of moves
 checkmate(KingPiece, Board, OpponentPieces, [Move | Moves]) :-
-    Move = move(X/Y, _),
+    Move = move(_, _, _, NewPos, _),
 
     % Do the current move
-    do_move(Piece, Move, Board, NewBoard),
+    do_move(Move, Board, NewBoard),
 
     % Check if the king is still not safe by doing this move
-    not(is_safe(X/Y, NewBoard, OpponentPieces)), !,
+    not(is_safe(NewPos, NewBoard, OpponentPieces)), !,
 
     % Recursive call
     checkmate(KingPiece, Board, OpponentPieces, Moves).
 
 checkmate(KingPiece, Board, OpponentPieces, []) :-
-    KingPiece = piece(_, _, X/Y),
+    Move = move(_, _, _, NewPos, _),
 
     % Check if the king is not safe
-    not(is_safe(X/Y, Board, OpponentPieces)), !.
+    not(is_safe(NewPos, Board, OpponentPieces)), !.
 
 %! check(+Board, +Color)
 %
@@ -81,28 +79,28 @@ is_safe(X/Y, Board, [Piece | Pieces]) :-
 is_safe(_, _, []).
 
 
-%! player_pieces(+Color, +Board, -PlayerBoard)
+%! player_pieces(+Color, +Board, -PlayerPieces)
 %
 % Unify all pieces for a given Color from a given Board with BoardPlayer
-player_pieces(Color, Board, PlayerBoard) :-
-    include(piece_color(Color), Board, PlayerBoard).
+player_pieces(Color, Board, PlayerPieces) :-
+    include(piece_color(Color), Board, PlayerPieces).
 
 % TODO: maybe merge this idk
 piece_color(Color, piece(Color, _, _)).
 
 
-%! do_move(+Piece, +Move, +Board)
+%! do_move(+Move, +Board, -NewBoard)
 %
 % Update the board with a given move for a given piece.
-do_move(piece(Color, Type, X/Y), move(XPos/YPos, _), Board, NewBoard) :-
+do_move(move(Color, Type, OldPos, NewPos, _), Board, NewBoard) :-
     % Remove the piece at the old position from the board
-    delete(Board, piece(_, _, X/Y), BoardDeleted1),
+    delete(Board, piece(_, _, OldPos), BoardDeleted1),
 
     % Remove the piece at the new position from the board
-    delete(BoardDeleted1, piece(_, _, XPos/YPos), BoardDeleted2),
+    delete(BoardDeleted1, piece(_, _, NewPos), BoardDeleted2),
 
     % Append the piece at the new position on the board
-    append(BoardDeleted2, [piece(Color, Type, XPos/YPos)], NewBoard).
+    append(BoardDeleted2, [piece(Color, Type, NewPos)], NewBoard).
 
 
 score_move(XPos/YPos, Board, Score) :-
@@ -116,6 +114,35 @@ score_move(XPos/YPos, Board, Score) :-
 % TODO: proper score pieces
 score_piece(_, _, 1).
 
+%! all_possible_moves(+Color, +Board, -Moves)
+%
+% All possible moves for all pieces on the given board of a given color.
+all_possible_moves(Color, Board, Moves) :-
+
+    % Get the pieces for the given color
+    player_pieces(Color, Board, Pieces),
+
+    % Get all possible moves for the pieces
+    all_possible_moves_for_pieces(Pieces, Board, Moves).
+
+
+%! all_possible_moves_for_pieces(+Pieces, +Board, -Moves)
+%
+% All possible moves for all given pieces on the given board.
+all_possible_moves_for_pieces([Piece | Pieces], Board, Moves) :-
+
+    % All possible moves for the current piece
+    possible_moves(Piece, Board, PieceMoves),
+
+    % Recursive call
+    all_possible_moves_for_pieces(Pieces, Board, RestMoves),
+
+    % Merge the moves into the moves list
+    append(PieceMoves, RestMoves, Moves).
+
+all_possible_moves_for_pieces([], _, []) :- !.
+
+
 %! possible_moves(+Piece, +Board, -Moves)
 %
 % All possible moves for the provided piece on the current board.
@@ -123,22 +150,26 @@ possible_moves(piece(Color, Type, X/Y), Board, Moves) :-
     Piece = piece(Color, Type, X/Y),
 
     % All possible positions for a piece
-    possible_positions(Piece, Board, Positions),
+    possible_positions(Piece, Board, NewPositions),
 
     % Convert all positions to a move
-    positions_to_moves(Color, Type, Positions, Moves).
+    positions_to_moves(Piece, NewPositions, Moves).
 
 
-%! positions_to_moves(+Color, +Type, +Positions, -Moves)
+%! positions_to_moves(+Piece, +Positions, -Moves)
 %
 % Corresponding moves for a given set of positions.
 % A "move" contains the position & a potential reward for moving to that position.
-positions_to_moves(_, _, [], []) :- !.
-positions_to_moves(Color, Type, [Position | Positions], [Move | Moves]) :-
-    Move = move(Position, 0),
+positions_to_moves(Piece, [NewPosition | NewPositions], [Move | Moves]) :-
+    Piece = piece(Color, Type, OldPosition),
+
+    % Construct the move
+    Move = move(Color, Type, OldPosition, NewPosition, 0),
     
-    positions_to_moves(Color, Type,  Positions,  Moves).
-    
+    % Recursive Call
+    positions_to_moves(Piece, NewPositions, Moves), !.
+
+positions_to_moves(_, [], []) :- !.
 
 %! possible_positions(+Piece, +Board, -Positions)
 %
@@ -321,7 +352,7 @@ opponent(black, white).
 % ----------------------------------------------------------
 
 
-minimax(Piece, Board, Score, NextMove) :-
+minimax(MinMax, Color, Board, BestScore, BestMove) :-
 
     % All potential moves for a given piece.
     possible_moves(Piece, Board, Moves).
