@@ -1,122 +1,6 @@
-%! checkmate(+Board, +Color)
-%
-% If a king with Color is checkmate.
-% The king is is checkmate if it has no possible moves left.
-checkmate(Board, Color) :-
-    KingPiece = piece(Color, king, Position),
-
-    % Position of the king of the given color
-    select(KingPiece, Board, _), !,
-
-    % Opponent player color
-    opponent(Color, OpponentColor),
-
-    % Opponent pieces
-    player_pieces(OpponentColor, Board, OpponentPieces),
-
-    % Possible moves for the king
-    possible_moves(KingPiece, Board, KingMoves),
-
-    checkmate(KingPiece, Board, OpponentPieces, KingMoves).
-
-%! checkmate(+KingPiece, +Board, +OpponentPieces, +Moves)
-%
-% If the given king is checkmate for the given set of opponent pieces and the given set of moves
-checkmate(KingPiece, Board, OpponentPieces, [Move | Moves]) :-
-    Move = move(_, _, _, NewPos, _),
-
-    % Do the current move
-    do_move(Move, Board, NewBoard),
-
-    % Check if the king is still not safe by doing this move
-    not(is_safe(NewPos, NewBoard, OpponentPieces)), !,
-
-    % Recursive call
-    checkmate(KingPiece, Board, OpponentPieces, Moves).
-
-checkmate(KingPiece, Board, OpponentPieces, []) :-
-    Move = move(_, _, _, NewPos, _),
-
-    % Check if the king is not safe
-    not(is_safe(NewPos, Board, OpponentPieces)), !.
-
-%! check(+Board, +Color)
-%
-% If a king with Color is in-check.
-% The king is now in range of attack by the opponent player
-check(Board, Color) :-
-
-    % Position of the king of the given color
-    select(piece(Color, king, Position), Board, _), !,
-
-    % Opponent player color
-    opponent(Color, OpponentColor),
-
-    % Opponent pieces
-    player_pieces(OpponentColor, Board, OpponentPieces),
-
-    % Check if any opponent piece can attack the king of the given color
-    not(is_safe(Position, Board, OpponentPieces)).
-
-
-%! is_safe(+Piece, +Board, +OpponentPieces)
-%
-% If a given position is safe from a potential attack.
-is_safe(X/Y, Board, [Piece | Pieces]) :-
-    % Destructuring
-    % TODO: ask if a @ operator exists like in Haskel
-    [OtherPiece | OtherPieces] = Board,
-
-    % Possible move positions for the current piece
-    possible_positions(Piece, Board, PiecePositions),
-
-    % Check if the Position is part of the piece possible positions.
-    not(member(X/Y, PiecePositions)), !,
-
-    % Recursive call
-    is_safe(X/Y, Board, Pieces).
-
-is_safe(_, _, []).
-
-
-%! player_pieces(+Color, +Board, -PlayerPieces)
-%
-% Unify all pieces for a given Color from a given Board with BoardPlayer
-player_pieces(Color, Board, PlayerPieces) :-
-    include(piece_color(Color), Board, PlayerPieces).
-
-% TODO: maybe merge this idk
-piece_color(Color, piece(Color, _, _)).
-
-
-%! do_move(+Move, +Board, -NewBoard)
-%
-% Update the board with a given move for a given piece.
-do_move(move(Color, Type, OldPos, NewPos, _), Board, NewBoard) :-
-    % Remove the piece at the old position from the board
-    delete(Board, piece(_, _, OldPos), BoardDeleted1),
-
-    % Remove the piece at the new position from the board
-    delete(BoardDeleted1, piece(_, _, NewPos), BoardDeleted2),
-
-    % Append the piece at the new position on the board
-    append(BoardDeleted2, [piece(Color, Type, NewPos)], NewBoard).
-
-
-score_move(XPos/YPos, Board, Score) :-
-    
-    % Color & Type for the piece at position
-    select(piece(Color, Type, XPos/YPos), Board, _),
-
-    % Score of the piece.
-    score_piece(Color, Type, Score).
-
-% TODO: proper score pieces
-score_piece(_, _, 1).
-
 %! all_possible_moves(+Color, +Board, -Moves)
 %
-% All possible moves for all pieces on the given board of a given color.
+%  All possible moves for all pieces on the given board of a given color.
 all_possible_moves(Color, Board, Moves) :-
 
     % Get the pieces for the given color
@@ -128,7 +12,7 @@ all_possible_moves(Color, Board, Moves) :-
 
 %! all_possible_moves_for_pieces(+Pieces, +Board, -Moves)
 %
-% All possible moves for all given pieces on the given board.
+%  All possible moves for all given pieces on the given board.
 all_possible_moves_for_pieces([Piece | Pieces], Board, Moves) :-
 
     % All possible moves for the current piece
@@ -139,122 +23,400 @@ all_possible_moves_for_pieces([Piece | Pieces], Board, Moves) :-
 
     % Merge the moves into the moves list
     append(PieceMoves, RestMoves, Moves).
-
 all_possible_moves_for_pieces([], _, []) :- !.
 
 
 %! possible_moves(+Piece, +Board, -Moves)
 %
-% All possible moves for the provided piece on the current board.
-possible_moves(piece(Color, Type, X/Y), Board, Moves) :-
-    Piece = piece(Color, Type, X/Y),
-
-    % All possible positions for a piece
-    possible_positions(Piece, Board, NewPositions),
-
-    % Convert all positions to a move
-    positions_to_moves(Piece, NewPositions, Moves).
-
-
-%! positions_to_moves(+Piece, +Positions, -Moves)
-%
-% Corresponding moves for a given set of positions.
-% A "move" contains the position & a potential reward for moving to that position.
-positions_to_moves(Piece, [NewPosition | NewPositions], [Move | Moves]) :-
-    Piece = piece(Color, Type, OldPosition),
-
-    % Construct the move
-    Move = move(Color, Type, OldPosition, NewPosition, 0),
-    
-    % Recursive Call
-    positions_to_moves(Piece, NewPositions, Moves), !.
-
-positions_to_moves(_, [], []) :- !.
-
-%! possible_positions(+Piece, +Board, -Positions)
-%
-% All possible positions for a specific piece.
+%  All possible moves for a specific piece.
 
 % King
-possible_positions(piece(Color, king, X/Y), Board, Positions) :-
+possible_moves(Piece, Board, Moves) :-
+    Piece = piece(_, king, _),
 
-    % King has same possible positions as square_position
-    findall(Position, square_position(X/Y, Color, Board, Position), Positions),
-    !.
+    % King can move in a square
+    square_moves(Piece, Board, Moves), !.
 
 % Queen
-possible_positions(piece(Color, queen, X/Y), Board, Positions) :-
+possible_moves(Piece, Board, Moves) :-
+    Piece = piece(_, queen, _),
 
-    % Queen has same possible positions as cross_position merged with diagonal_position
-    findall(Position, cross_position(X/Y, Color, Board, Position), CrossPositions),
-    findall(Position, diagonal_position(X/Y, Color, Board, Position), DiagonalPositions),
-    
-    % Merge cross positions with the diagonal positions into a full list
-    append(CrossPositions, DiagonalPositions, Positions),
-    !.
+    % Queen can move diagonally or in a cross
+    cross_moves(Piece, Board, CrossMoves),
+    diagonal_moves(Piece, Board, DiagonalMoves),
+
+    % Merge possible moves
+    append([CrossMoves, DiagonalMoves], Moves), !.
 
 % Tower
-possible_positions(piece(Color, tower, X/Y), Board, Positions) :-
+possible_moves(Piece, Board, Moves) :-
+    Piece = piece(_, tower, _),
 
-    % Tower has same possible positions as cross_position
-    findall(Position, cross_position(X/Y, Color, Board, Position), Positions),
-    !.
-    
+    % Tower can move in a cross
+    cross_moves(Piece, Board, Moves), !.
+
 % Bishop
-possible_positions(piece(Color, tower, X/Y), Board, Positions) :-
+possible_moves(Piece, Board, Moves) :-
+    Piece = piece(_, bishop, _),
 
-    % Bishop has same possible positions as diagonal_position
-    findall(Position, diagonal_position(X/Y, Color, Board, Position), Positions),
-    !.
+    % Bishop can move in diagonally.
+    diagonal_moves(Piece, Board, Moves), !.
+
+% Horse
+possible_moves(Piece, Board, Moves) :-
+   Piece = piece(_, horse, _),
+
+   % Horse positions
+   findall(Position, horse_position(Piece, Board, Position), Positions),
+
+   % Convert positions into moves
+   positions_to_moves(Piece, Positions, Moves), !.
+
+% Pawn
+possible_moves(Piece, Board, Moves) :-
+    Piece = piece(_, pawn, _),
+
+    % Possible moves
+    pawn_forward_moves(Piece, Board, ForwardMoves),
+    pawn_diagonal_moves(Piece, Board, DiagonalMoves),
+    pawn_promotion_moves(Piece, Board, PromitionMoves),
+    pawn_passant_moves(Piece, Board, PassantMoves),
+
+    % Merge possible moves
+    append([ForwardMoves, DiagonalMoves, PromitionMoves, PassantMoves], Moves), !.
+
+
+%! pawn_moves(+OldPiece, +Board, +Moves)
+% 
+%  Moves for the pawn going forward
+pawn_forward_moves(Piece, Board, Moves) :- % Pawn on start position (can move 2 steps forward)
+    Piece = piece(Color, _, X/Y),
+
+    % Pawn must be on start position
+    pawn_start_position(Piece),
+
+    % First position must be valid & empty (otherwise the pawn is not able to move 2 steps forward)
+    XNew1 is X,
+    forward(Color, Y, YNew1),
+    valid_position(XNew1/YNew1),
+    empty_position(XNew1/YNew1, Board),
+
+    % Second position must be valid & empty
+    XNew2 is X,
+    forward(Color, YNew1, YNew2),
+    valid_position(XNew2/YNew2),
+    empty_position(XNew2/YNew2, Board),
     
+    % Create the moves
+    create_move(Piece, XNew1/YNew1, Move1),
+    create_move(Piece, XNew2/YNew2, Move2),
+
+    % Append the moves to the moves list
+    append([[Move1, Move2]], Moves), !.
+
+pawn_forward_moves(Piece, Board, Moves) :- % Pawn (can move max 1 step forward)
+    Piece = piece(Color, _, X/Y),
+
+    % First position must be valid & empty
+    XNew1 is X,
+    forward(Color, Y, YNew1),
+    valid_position(XNew1/YNew1),
+    empty_position(XNew1/YNew1, Board),
+
+    % Create the moves
+    create_move(Piece, XNew1/YNew1, Move1),
+
+    % Append the moves to the moves list
+    append([[Move1]], Moves), !.
+
+pawn_forward_moves(_, _, []) :- !. % Pawn cannot move forward
+
+
+%! pawn_diagonal_moves(+Piece, +Board, -Moves)
+%
+%  Moves for the given pawn moving diagonally
+pawn_diagonal_moves(Piece, Board, Moves) :-
     
-%! valid_position(+X/+Y)
-%
-% Check if a give coordinate is a valid position on the board for a piece to move to.
-% Will check if the position is on the board (not outside).
-%
-% WARNING: This predicate will not check if the position is allowed for the particular piece type!
-valid_position(X/Y) :- 
+    % Moves for both diagonal parts
+    pawn_diagonal_moves_part(Piece, Board, -1, LeftMoves),
+    pawn_diagonal_moves_part(Piece, Board, 1, RightMoves),
 
-    % X must be inside the board
-    X >= 1, 
-    X =< 8, 
+    % Merge the 2 lists
+    append([LeftMoves, RightMoves], Moves).
+
+
+%! pawn_diagonal_moves_part(+Piece, +Board, +XDifference, -Moves)
+%
+%  Moves for the given pawn moving diagonally either left or right.
+%  XDifference = 1: right diagonal move
+%  XDifference = -1: left diagonal move
+pawn_diagonal_moves_part(Piece, Board, XDifference, Moves) :- % Left diagonal
+    Piece = piece(Color, _, X/Y),
+
+    % New position
+    XNew is X + XDifference,
+    forward(Color, Y, YNew),
+
+    % New position must be valid
+    valid_position(XNew/YNew),
+
+    % New position must be taken by an opponent piece
+    opponent_position(XNew/YNew, Color, Board),
+
+    % Create the move
+    create_move(Piece, XNew/YNew, Move),
+
+    % Append the move to the list
+    append([[Move]], Moves), !.
+pawn_diagonal_moves_part(_, _, _, []) :- !.
+
+
+%! pawn_promotion_moves(+Piece, +Board, -Moves)
+%
+%  Move for the given pawn if reaching a point of promotion
+%  TODO: remove board variable
+pawn_promotion_moves(Piece, _, Moves) :-
+    Piece = piece(Color, _, X/Y),
+
+    % Pawn must be on promotion position
+    pawn_promotion_position(Piece),
+
+    % Possible moves
+    Moves = [
+        move(Piece, piece(Color, queen, X/Y), [], []),
+        move(Piece, piece(Color, horse, X/Y), [], []),
+        move(Piece, piece(Color, tower, X/Y), [], []),
+        move(Piece, piece(Color, bishop, X/Y), [], [])
+    ], !.
+pawn_promotion_moves(_, _, []) :- !.
+
+%! pawn_passant_moves(+Piece, +Board, -Moves)
+%
+%  Move for the given pawn if an en-passant move is possible
+pawn_passant_moves(Piece, Board, Moves) :-
+        
+    % En-pasant for both directions
+    pawn_passant_moves_part(Piece, Board, -1, LeftMoves),
+    pawn_passant_moves_part(Piece, Board, 1, RightMoves),
+
+    % Merge the 2 lists
+    append([LeftMoves, RightMoves], Moves).
+
+
+%! pawn_passant_moves_part(+Piece, +Board, +XDifference, -Moves)
+%
+%  Moves for the given pawn doing en-passant either left or right
+%  XDifference = 1: right en-passant move
+%  XDifference = -1: left en-passant move
+pawn_passant_moves_part(Piece, Board, XDifference, Moves) :-
+    Piece = piece(Color, Type, X/Y),
+
+    % Check if there is an opponent next to the current piece & if it is standing en-passant
+    XOpponent is X + XDifference,
+    YOpponent is Y,
+    opponent_position(XOpponent/YOpponent, Color, Board, OpponentPiece),
+    pawn_passant_position(OpponentPiece),
+
+    % New position of the pawn after en-passant
+    XNew is X + XDifference,
+    forward(Color, Y, YNew),
+
+    % Create the move
+    Move = move(Piece, piece(Color, Type, XNew/YNew), [OpponentPiece], []),
+
+    % Append the move to the list
+    append([[Move]], Moves), !.
+pawn_passant_moves_part(_, _, _, []) :- !.
+
+
+%! pawn_start_position(+Piece)
+%
+%  Pawn is on it's starting position.
+pawn_start_position(piece(white, pawn, _/2)).
+pawn_start_position(piece(black, pawn, _/7)).
+
+
+%! pawn_promotion_position(+Piece)
+%
+%  Pawn is on it's promotion position.
+pawn_promotion_position(piece(white, pawn, _/8)).
+pawn_promotion_position(piece(black, pawn, _/1)).
+
+
+%! pawn_passant_position(+Piece)
+%
+%  Pawn is on a position where an en-passant is possible.
+pawn_passant_position(piece(white, pawn, _/4)).
+pawn_passant_position(piece(black, pawn, _/5)).
+
+
+%! forward(+Color, +Y, -YNew)
+% 
+%  Forward for a given piece
+%  For white pieces: +1
+%  For black pieces: -1
+forward(white, Y, YNew) :- YNew is Y + 1.
+forward(black, Y, YNew) :- YNew is Y - 1.
+
+
+%! square_moves(+OldPiece, +Board, -Moves)
+%
+%  Moves in a square around a given piece
+square_moves(OldPiece, Board, Moves) :-
+
+    % Square positions
+    findall(Position, square_position(OldPiece, Board, Position), Positions),
+
+    % Convert positions into moves
+    positions_to_moves(OldPiece, Positions, Moves).
+
+
+%! cross_moves(+OldPiece, +Board, -Moves)
+%
+%  Moves in a cross starting from a given piece
+cross_moves(OldPiece, Board, Moves) :-
+
+    path_moves(OldPiece, Board, 1, 0, RightMoves),   % Right row part
+    path_moves(OldPiece, Board, -1, 0, LeftMoves),   % Left row part
+    path_moves(OldPiece, Board, 0, 1, TopMoves),     % Top column part
+    path_moves(OldPiece, Board, 0, -1, BottomMoves), % Bottom column part
+
+    % Merge lists
+    append([RightMoves, LeftMoves, TopMoves, BottomMoves], Moves).
+
+
+%! diagonal_moves(+OldPiece, +Board, -Moves)
+%
+%  Moves on the diagonals starting from a given piece
+diagonal_moves(OldPiece, Board, Moves) :-
+    path_moves(OldPiece, Board, 1, 1, TopRightMoves),      % Top-right diagonal
+    path_moves(OldPiece, Board, -1, 1, TopLeftMoves),      % Top-right diagonal
+    path_moves(OldPiece, Board, 1, -1, BottomRightMoves),  % Bottom-right diagonal
+    path_moves(OldPiece, Board, -1, -1, BottomLeftMoves),  % Bottom-left diagonal
+
+    % Merge lists
+    append([TopRightMoves, TopLeftMoves, BottomRightMoves, BottomLeftMoves], Moves).
+
+
+%! positions_to_moves(+OldPiece, +Positions, -Moves)
+%
+%  Corresponding moves for a given set of positions
+positions_to_moves(OldPiece, [Position | Positions], [Move | Moves]) :-
+
+    % Construct the move
+    create_move(OldPiece, Position, Move),
     
-    % Y must be inside the board
-    Y >= 1, 
-    Y =< 8.
+    % Recursive Call
+    positions_to_moves(OldPiece, Positions, Moves), !.
+positions_to_moves(_, [], []) :- !.
 
 
-%! opponent_position(+X/+Y, +Color, +Board)
+%! create_move(+OldPiece, +XNew/YNew, -Move)
 %
-% Check if a given position is taken by a piece of the opponent player.
-opponent_position(X/Y, Color, Board) :-
-
-    % Opponent color
-    opponent(Color, OpponentColor),
-
-    % Piece must be of the opponent's color
-    member(piece(OpponentColor, _, X/Y), Board).
-
-
-%! empty_position(+X/+Y, +Color, +Board)
+%  Create a move for a given piece and position
 %
-% Check if a given position is not taken by a piece.
-empty_position(X/Y, Board) :-
-    not(member(piece(_, _, X/Y), Board)).
+%  TODO: this name is not very prolog (create_move is not a fact?)
+create_move(OldPiece, XNew/YNew, Move) :-
+    OldPiece = piece(Color, Type, _),
+    NewPiece = piece(Color, Type, XNew/YNew),
+
+    % Unify the move
+    Move = move(OldPiece, NewPiece, [], []).
 
 
-%! empty_or_opponent_position(+X/+Y, +Color, +Board)
+%! path_moves(+Piece, +Board, +XDirection, +YDirection, -Moves)
 %
-% Check if a position is empty or taken by a piece of the opponent player.
-empty_or_opponent_position(X/Y, Color, Board) :- opponent_position(X/Y, Color, Board), !.
-empty_or_opponent_position(X/Y, _, Board) :- empty_position(X/Y, Board), !.
-
-
-%! square_position(+X/+Y, +Color, +Board, -XPos/-YPos)
+%  Moves on a given path starting from a piece and with incremental addition of (XDirection, YDirection)
+%  Will stop the path when a new position is either invalid or blocked by another piece
 %
-% Positions in a square around (X, Y)
-square_position(X/Y, Color, Board, XPos/YPos) :-
+%  TODO: ask prof about code duplication
+path_moves(OldPiece, Board, XDirection, YDirection, [Move | Moves]) :-
+    OldPiece = piece(Color, Type, X/Y),
+    
+    % Unify the new position
+    XNew is X + XDirection,
+    YNew is Y + YDirection,
+
+    % Unify the new piece
+    NewPiece = piece(Color, Type, XNew, YNew),
+
+    % Create the move
+    create_move(OldPiece, XNew/YNew, Move),
+
+    % New position must be valid
+    valid_position(XNew/YNew),
+
+    % New position must be empty
+    empty_position(XNew/YNew, Board), !,
+
+    % Recursivly extend the diagonal
+    path_moves(NewPiece, Board, XDirection, YDirection, Moves).
+
+path_moves(OldPiece, Board, XDirection, YDirection, [Move]) :-
+    OldPiece = piece(Color, _, X/Y),
+    
+    % Unify the new position
+    XNew is X + XDirection,
+    YNew is Y + YDirection,
+
+    % Create the move
+    create_move(OldPiece, XNew/YNew, Move),
+
+    % New position must be valid
+    valid_position(XNew/YNew),
+
+    % New position must be taken by the opponent
+    opponent_position(XNew/YNew, Color, Board), !.
+
+path_moves(_, _, _, _, []) :- !.
+
+
+%! horse_position(+Piece, +Board, -Position)
+%
+%  Move that could be done by the horse from a given piece
+horse_position(piece(Color, _, X/Y), Board, XPos/YPos) :-
+
+    % TODO: create seperate predicate to use for [N - 1, N + 1]
+    XMinus2 is X - 2,
+    XPlus2  is X + 2,
+    YMinus2 is Y - 2,
+    YPlus2  is Y + 2,
+
+    % Positions in a square the current position
+    % (X/Y) will also be unified
+    between(XMinus2, XPlus2, XPos),
+    between(YMinus2, YPlus2, YPos),
+
+    % New position must be valid
+    valid_position(XPos/YPos),
+
+    % Position must be empty or taken by an opponent piece
+    empty_or_opponent_position(XPos/YPos, Color, Board),
+
+    % Difference in positions
+    XDiff is X - XPos,
+    YDiff is Y - YPos,
+
+    % Possible differences for the move
+    PossibleDifferences = [
+        (-1, 2),
+        (-2, 1),
+        (1, 2),
+        (2, 1),
+        (-2, -1),
+        (-1, -2),
+        (2, -1),
+        (1, -2)
+    ],
+
+    % Difference must be a member of the possible differences
+    member((XDiff, YDiff), PossibleDifferences).
+
+%! square_position(+Piece, +Board, -XPos/-YPos)
+%
+%  Position in a square around a given piece
+square_position(OldPiece, Board, XPos/YPos) :-
+    OldPiece = piece(Color, _, X/Y),
 
     % TODO: create seperate predicate to use for [N - 1, N + 1]
     XMinus is X - 1,
@@ -275,86 +437,77 @@ square_position(X/Y, Color, Board, XPos/YPos) :-
 
     % New position must be empty or taken by an opponent piece
     empty_or_opponent_position(XPos/YPos, Color, Board).
-    
 
 
-%! cross_position(+X/+Y, +Color, +Board, -XPos/-YPos)
+%! valid_position(+X/+Y)
 %
-% Positions in a cross starting from (X, Y) to the edges of the board
-
-% Right row part
-cross_position(X/Y, Color, Board, Pos) :-
-    (
-        path_positions(X/Y, Color, Board, 1, 0, Positions);   % Right row part
-        path_positions(X/Y, Color, Board, -1, 0, Positions);  % Left row part
-        path_positions(X/Y, Color, Board, 0, 1, Positions);  % Top column part
-        path_positions(X/Y, Color, Board, 0, -1, Positions)  % Bottom column part
-    ),
-
-    member(Pos, Positions).
-
-
-%! diagonal_position(+X/+Y, +Board, -XPos/-YPos)
+%  Check if a give coordinate is a valid position on the board for a piece to move to.
+%  Will check if the position is on the board (not outside).
 %
-% Positions on the diagonals starting from (X, Y)
-diagonal_position(X/Y, Color, Board, Pos) :-
-    (
-        path_positions(X/Y, Color, Board, 1, 1, Positions);   % Top-right diagonal
-        path_positions(X/Y, Color, Board, -1, 1, Positions);  % Top-left diagonal
-        path_positions(X/Y, Color, Board, 1, -1, Positions);  % Bottom-right diagonal
-        path_positions(X/Y, Color, Board, -1, -1, Positions)  % Bottom-left diagonal
-    ),
+%  WARNING: This predicate will not check if the position is allowed for the particular piece type!
+valid_position(X/Y) :- 
 
-    member(Pos, Positions).
+    % X must be inside the board
+    between(1, 8, X),
+    
+    % Y must be inside the board
+    between(1, 8, Y).
 
 
-%! path_positions(+X/+Y, +Color, +Board, +XDirection, +YDirection, -Positions)
+%! opponent_position(+X/+Y, +Color, +Board)
 %
-% Positions on a given path with start position (X, Y) and with incremental addition of (XDirection, YDirection)
-% TODO: ask prof about code duplication
-path_positions(X/Y, Color, Board, XDirection, YDirection, [XPos/YPos | Positions]) :-
-    
-    % Unify the new position
-    XPos is X + XDirection,
-    YPos is Y + YDirection,
+%  Check if a given position is taken by a piece of the opponent player.
+opponent_position(X/Y, Color, Board) :-
 
-    % New position must be valid
-    valid_position(XPos/YPos),
+    % Opponent color
+    opponent(Color, OpponentColor),
 
-    % New position must be empty
-    empty_position(XPos/YPos, Board), !,
+    % Piece must be of the opponent's color
+    member(piece(OpponentColor, _, X/Y), Board).
 
-    % Recursivly extend the diagonal
-    path_positions(XPos/YPos, Color, Board, XDirection, YDirection, Positions).
 
-path_positions(X/Y, Color, Board, XDirection, YDirection, [XPos/YPos]) :-
-    
-    % Unify the new position
-    XPos is X + XDirection,
-    YPos is Y + YDirection,
+%! opponent_position(+X/+Y, +Color, +Board, -OpponentPiece)
+%
+%  Check if a given position is taken by a piece of the opponent player.
+%  Unify the piece with OpponentPiece.
+opponent_position(X/Y, Color, Board, OpponentPiece) :-
 
-    % New position must be valid
-    valid_position(XPos/YPos),
+    % Opponent color
+    opponent(Color, OpponentColor),
 
-    % New position must be taken by the opponent
-    opponent_position(XPos/YPos, Color, Board), !.
+    % Opponent piece
+    OpponentPiece = piece(OpponentColor, _, X/Y),
 
-path_positions(_X/_Y, _Color, _Board, _XDirection, _YDirection, []) :- !.
+    % Piece must be of the opponent's color
+    member(OpponentPiece, Board).
+
+
+%! empty_position(+X/+Y, +Color, +Board)
+%
+%  Check if a given position is not taken by a piece.
+empty_position(X/Y, Board) :-
+    not(member(piece(_, _, X/Y), Board)).
+
+
+%! empty_or_opponent_position(+X/+Y, +Color, +Board)
+%
+%  Check if a position is empty or taken by a piece of the opponent player.
+empty_or_opponent_position(X/Y, Color, Board) :- opponent_position(X/Y, Color, Board), !.
+empty_or_opponent_position(X/Y, _, Board) :- empty_position(X/Y, Board), !.
 
 
 %! opponent(+Color, -OpponentColor)
 %
-% Opponent color for a given color
+%  Opponent color for a given color
 opponent(white, black).
 opponent(black, white).
 
 
-% ----------------------------------------------------------
+%! player_pieces(+Color, +Board, -PlayerPieces)
+%
+% Unify all pieces for a given Color from a given Board with BoardPlayer
+player_pieces(Color, Board, PlayerPieces) :-
+    include(piece_color(Color), Board, PlayerPieces).
 
-
-minimax(MinMax, Color, Board, BestScore, BestMove) :-
-
-    % All potential moves for a given piece.
-    possible_moves(Piece, Board, Moves).
-
-    % Find the best move available.
+% TODO: maybe merge this idk
+piece_color(Color, piece(Color, _, _)).
