@@ -208,7 +208,8 @@ pawn_passant_moves(Piece, Board, Moves) :-
 %  Moves for the given pawn doing en-passant either left or right
 %  XDifference = 1: right en-passant move
 %  XDifference = -1: left en-passant move
-pawn_passant_moves_part(Piece, Board, XDifference, Moves) :-
+%  TODO: List of moves to single move (because a list is useless here)
+pawn_passant_moves_part(Piece, Board, XDifference, [Move | Moves]) :-
     Piece = piece(Color, Type, X/Y),
 
     % Check if there is an opponent next to the current piece & if it is standing en-passant
@@ -505,9 +506,43 @@ opponent(black, white).
 
 %! player_pieces(+Color, +Board, -PlayerPieces)
 %
-% Unify all pieces for a given Color from a given Board with BoardPlayer
+%  Unify all pieces for a given Color from a given Board with BoardPlayer
 player_pieces(Color, Board, PlayerPieces) :-
     include(piece_color(Color), Board, PlayerPieces).
 
 % TODO: maybe merge this idk
 piece_color(Color, piece(Color, _, _)).
+
+
+%! row_pieces(+Y, +Board, -Pieces)
+%
+%  List of pieces for a given row.
+row_pieces(Y, [Piece | Pieces], [RowPiece | RowPieces]) :- % Match
+    Piece = piece(_, _, _/PieceY),
+
+    % Row numbers must match
+    PieceY = Y,
+
+    % Append to the list
+    RowPiece = Piece, !,
+
+    % Recursive call
+    row_pieces(Y, Pieces, RowPieces), !.
+
+row_pieces(Y, [Piece | Pieces], RowPieces) :- % No match
+    Piece = piece(_, _, _/PieceY),
+    
+    % Row numbers must not match
+    PieceY \= Y,
+
+    % Recursive call
+    row_pieces(Y, Pieces, RowPieces), !.
+
+row_pieces(_, [], []) :- !.
+
+
+%! sorted_pieces(+Pieces, -SortedPieces)
+%
+%  Sorted list for a given list of pieces.
+sorted_pieces(Pieces, SortedPieces) :-
+    sort(Pieces, SortedPieces).
