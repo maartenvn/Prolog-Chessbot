@@ -6,25 +6,28 @@
 % Interpret quoted strings as ASCII character codes.
 :- set_prolog_flag(double_quotes, codes).
 
+
 test :-
-    phrase_from_file(parse_board(Board, Rokades, Passant, StartColor), "boards/start.txt", [encoding(utf8),type(text)]),
+    phrase_from_file(parse_board(Board, StartColor), "boards/start.txt", [encoding(utf8),type(text)]),
     write(Board),
-    write(Rokades),
-    write(Passant).
+    write(StartColor).
 
 
-%! parse_board(-Board, -Rokades, -Passant, -StartColor)
+%! parse_board(-Board, StartColor)
 %
 %  Parse a chess board.
-parse_board(Board, Rokades, Passant, StartColor) --> 
+parse_board(Board, StartColor) --> 
     parse_rows(8, PiecesList, RokadesList, Passant, StartColor),
     parse_final_row,
     {
         % Create a flat list of pieces to create the board
-        append(PiecesList, Board),
+        append(PiecesList, Pieces),
 
         % Create a flat list of rokades to create the board
-        append(RokadesList, Rokades)
+        append(RokadesList, Rokades),
+
+        % Create board
+        Board = board(Pieces, Rokades, Passant)
     }.
 
 
@@ -36,13 +39,13 @@ parse_rows(8, [Pieces | PiecesRest], [Rokades | RokadesRest], Passant, StartColo
     parse_border_row(8, black, Pieces, Rokades, Passant, StartColor),
 
     % Recursive call
-    parse_rows(7, PiecesRest, RokadesRest, StartColor), !.
+    parse_rows(7, PiecesRest, RokadesRest, Passant, StartColor), !.
 
-parse_rows(1, [Pieces], [Rokades], StartColor) --> % First row
+parse_rows(1, [Pieces], [Rokades], Passant, StartColor) --> % First row
     % Parse the row
     parse_border_row(1, white, Pieces, Rokades, Passant, StartColor), !.
 
-parse_rows(Y, [Pieces | PiecesRest], Rokades, StartColor) --> % Rows in between first & last row
+parse_rows(Y, [Pieces | PiecesRest], Rokades, Passant, StartColor) --> % Rows in between first & last row
     {
         YNext is Y - 1
     },
@@ -51,7 +54,7 @@ parse_rows(Y, [Pieces | PiecesRest], Rokades, StartColor) --> % Rows in between 
     parse_row(Y, Pieces),
     
     % Recursive call
-    parse_rows(YNext, PiecesRest, Rokades, StartColor), !.
+    parse_rows(YNext, PiecesRest, Rokades, Passant, StartColor), !.
 
 
 %! parse_row(-Y, -Pieces)

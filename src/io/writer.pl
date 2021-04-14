@@ -2,14 +2,18 @@
 
 :- use_module("parser").
 :- use_module("../positions").
+:- use_module("../moves").
+:- use_module("../pieces").
 
 
-%! write_board(+Board, +Rokades, +Passant, +StartColor)
+%! write_board(+Board, +StartColor)
 %
 %  Write a chess board to stdout.
-write_board(Board, Rokades, Passant, StartColor) :-
+write_board(Board, StartColor) :-
+    Board = board(Pieces, Rokades, Passant),
+
     % Convert board & rokades in a format that could be used by the parser
-    extract_rows(8, Board, PiecesList),
+    extract_rows(8, Pieces, PiecesList),
     extract_rokades(Rokades, RokadesList),
 
     % Parse the rows output
@@ -23,24 +27,24 @@ write_board(Board, Rokades, Passant, StartColor) :-
     write_codes(OutFinalRow).
 
 
-%! write_board_moves(+StartColor, +Board, +Rokades, +Passant, +Moves)
+%! write_board_moves(+StartColor, +Board, +Moves)
 %
-%  Write all possible chess boards for the given board to stdout.
-write_board_moves(StartColor, Board, Rokades, Passant, [Move | Moves]) :-
+%  Write all possible chess boards for the given set of moves to stdout.
+write_board_moves(StartColor, Board, [Move | Moves]) :-
 
     % Do the move
-    positions:do_move(Move, Board, Rokades, NewBoard, NewRokades),
+    moves:do_move(Move, Board, NewBoard),
 
     % Opponent is now at play
     positions:opponent(StartColor, NextColor),
 
     % Write the board to stdout
-    write_board(NewBoard, NewRokades, Passant, NextColor),
+    write_board(NewBoard, NextColor),
     write("\n~\n"),
 
     % Recursive call
-    write_board_moves(StartColor, Board, Rokades, Moves).
-write_board_moves(_, _, _, []).
+    write_board_moves(StartColor, Board, Moves).
+write_board_moves(_, _, []).
 
 
 %! write_codes(+Codes)
@@ -51,20 +55,22 @@ write_codes(Codes) :-
     write(String).
 
 
-%! extract_rows(+Y, +Board, -Rows)
+%! extract_rows(+Y, +Pieces, -Rows)
 %
 %  List of pieces for a given board, with each list representing the pieces for that row.
-extract_rows(Y, Board, [Row | Rows]) :-
+extract_rows(Y, Pieces, [Row | Rows]) :-
+
+    % Y must be valid
     between(1, 8, Y), !,
 
     % Extract the row
-    positions:row_pieces(Y, Board, Row),
+    pieces:row_pieces(Y, Pieces, Row),
 
     % Next row
     YNext is Y - 1,
 
     % Recursive call
-    extract_rows(YNext, Board, Rows), !.
+    extract_rows(YNext, Pieces, Rows), !.
 extract_rows(_, _, []) :- !.
 
 
