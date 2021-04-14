@@ -1,44 +1,44 @@
-%! all_possible_moves(+Color, +Board, -Moves)
+%! all_possible_moves(+Color, +Board, +Rokades, -Moves)
 %
 %  All possible moves for all pieces on the given board of a given color.
-all_possible_moves(Color, Board, Moves) :-
+all_possible_moves(Color, Board, Rokades, Moves) :-
 
     % Get the pieces for the given color
     player_pieces(Color, Board, Pieces),
 
     % Get all possible moves for the pieces
-    all_possible_moves_for_pieces(Pieces, Board, Moves).
+    all_possible_moves_for_pieces(Pieces, Board, Rokades, Moves).
 
 
-%! all_possible_moves_for_pieces(+Pieces, +Board, -Moves)
+%! all_possible_moves_for_pieces(+Pieces, +Board, +Rokades, -Moves)
 %
 %  All possible moves for all given pieces on the given board.
-all_possible_moves_for_pieces([Piece | Pieces], Board, Moves) :-
+all_possible_moves_for_pieces([Piece | Pieces], Board, Rokades, Moves) :-
 
     % All possible moves for the current piece
-    possible_moves(Piece, Board, PieceMoves),
+    possible_moves(Piece, Board, Rokades, PieceMoves),
 
     % Recursive call
-    all_possible_moves_for_pieces(Pieces, Board, RestMoves),
+    all_possible_moves_for_pieces(Pieces, Board, Rokades, RestMoves),
 
     % Merge the moves into the moves list
     append(PieceMoves, RestMoves, Moves).
-all_possible_moves_for_pieces([], _, []) :- !.
+all_possible_moves_for_pieces([], _, _, []) :- !.
 
 
-%! possible_moves(+Piece, +Board, -Moves)
+%! possible_moves(+Piece, +Board, +Rokades, -Moves)
 %
 %  All possible moves for a specific piece.
 
 % King
-possible_moves(Piece, Board, Moves) :-
+possible_moves(Piece, Board, Rokades, Moves) :-
     Piece = piece(_, king, _),
 
     % King can move in a square
     square_moves(Piece, Board, Moves), !.
 
 % Queen
-possible_moves(Piece, Board, Moves) :-
+possible_moves(Piece, Board, _, Moves) :-
     Piece = piece(_, queen, _),
 
     % Queen can move diagonally or in a cross
@@ -49,21 +49,21 @@ possible_moves(Piece, Board, Moves) :-
     append([CrossMoves, DiagonalMoves], Moves), !.
 
 % Tower
-possible_moves(Piece, Board, Moves) :-
+possible_moves(Piece, Board, _, Moves) :-
     Piece = piece(_, tower, _),
 
     % Tower can move in a cross
     cross_moves(Piece, Board, Moves), !.
 
 % Bishop
-possible_moves(Piece, Board, Moves) :-
+possible_moves(Piece, Board, _, Moves) :-
     Piece = piece(_, bishop, _),
 
     % Bishop can move in diagonally.
     diagonal_moves(Piece, Board, Moves), !.
 
 % Horse
-possible_moves(Piece, Board, Moves) :-
+possible_moves(Piece, Board, _, Moves) :-
    Piece = piece(_, horse, _),
 
    % Horse positions
@@ -73,7 +73,7 @@ possible_moves(Piece, Board, Moves) :-
    positions_to_moves(Piece, Positions, Moves), !.
 
 % Pawn
-possible_moves(Piece, Board, Moves) :-
+possible_moves(Piece, Board, _, Moves) :-
     Piece = piece(_, pawn, _),
 
     % Possible moves
