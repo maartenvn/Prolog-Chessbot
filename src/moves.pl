@@ -110,7 +110,7 @@ possible_moves(Piece, board(Pieces, _, _), Moves) :-
     append([ForwardMoves, DiagonalMoves, PromitionMoves/*, PassantMoves*/], Moves), !.
 
 
-%! pawn_moves(+OldPiece, +Pieces, +Moves)
+%! pawn_moves(+OldPiece, +Pieces, -Passant, -Moves)
 % 
 %  Moves for the pawn going forward
 pawn_forward_moves(Piece, Pieces, Moves) :- % Pawn on start position (can move 2 steps forward)
@@ -124,19 +124,22 @@ pawn_forward_moves(Piece, Pieces, Moves) :- % Pawn on start position (can move 2
     positions:valid_position(XNew1/YNew1),
     positions:empty_position(XNew1/YNew1, Pieces),
 
+    % First position is a possible passant move for the next player
+    Passant = XNew1/YNew1,
+
     % Second position must be valid & empty
     positions:forward_position(XNew/YNew, Color, XNew2/YNew2),
     positions:valid_position(XNew2/YNew2),
     positions:empty_position(XNew2/YNew2, Pieces),
     
     % Create the moves
-    create_move(Piece, XNew1/YNew1, Pieces, Move1),
+    create_move(Piece, XNew1/YNew1, Pieces, Move1, [], XNew1/YNew1), % En-passant possibility
     create_move(Piece, XNew2/YNew2, Pieces, Move2),
 
     % Append the moves to the moves list
     append([[Move1, Move2]], Moves), !.
 
-pawn_forward_moves(Piece, Pieces, Moves) :- % Pawn (can move max 1 step forward)
+pawn_forward_moves(Piece, Pieces, none, Moves) :- % Pawn (can move max 1 step forward)
     Piece = piece(Color, _, X/Y),
 
     % First position must be valid & empty
@@ -150,7 +153,7 @@ pawn_forward_moves(Piece, Pieces, Moves) :- % Pawn (can move max 1 step forward)
     % Append the moves to the moves list
     append([[Move1]], Moves), !.
 
-pawn_forward_moves(_, _, []) :- !. % Pawn cannot move forward
+pawn_forward_moves(_, _, none, []) :- !. % Pawn cannot move forward
 
 
 %! pawn_diagonal_moves(+OldPiece, +Pieces, -Moves)
@@ -303,12 +306,19 @@ positions_to_moves(OldPiece, Pieces, [Position | Positions], [Move | Moves]) :-
 positions_to_moves(_, _, [], []) :- !.
 
 
-%! create_move(+OldPiece, +XNew/YNew, +Pieces, -Move)
+%! create_move/4(+OldPiece, +XNew/YNew, +Pieces, -Move)
 %
 %  Create a move for a given piece and position
 %
 %  TODO: this name is not very prolog (create_move is not a fact?)
-create_move(OldPiece, XNew/YNew, Pieces, Move) :- % Opponent on new position
+create_move(OldPiece, XNew/YNew, Pieces, Move) :-
+    create_move(OldPiece, XNew/YNew, Pieces, [], none, Move).
+
+
+%! create_move/6(+OldPiece, +XNew/YNew, +Pieces, +DeleteRokades, +Passant -Move)
+%
+%  Create a move for a given piece, position, rokades to delete and en-passant possability
+create_move(OldPiece, XNew/YNew, Pieces, DeleteRokades, Passant, Move) :- % Opponent on new position
     OldPiece = piece(Color, Type, _),
     NewPiece = piece(Color, Type, XNew/YNew),
 
@@ -316,9 +326,9 @@ create_move(OldPiece, XNew/YNew, Pieces, Move) :- % Opponent on new position
     positions:opponent_position(XNew/YNew, Color, Pieces, OpponentPiece),
 
     % Unify the move
-    Move = move([OldPiece, OpponentPiece], [NewPiece], [], none), !.
+    Move = move([OldPiece, OpponentPiece], [NewPiece], DeleteRokades, Passant), !.
 
-create_move(OldPiece, XNew/YNew, Pieces, Move) :- % No piece on new position
+create_move(OldPiece, XNew/YNew, Pieces, DeleteRokades, Passant, Move) :- % No piece on new position
     OldPiece = piece(Color, Type, _),
     NewPiece = piece(Color, Type, XNew/YNew),
 
@@ -326,7 +336,7 @@ create_move(OldPiece, XNew/YNew, Pieces, Move) :- % No piece on new position
     positions:empty_position(XNew/YNew, Pieces),
 
     % Unify the move
-    Move = move([OldPiece], [NewPiece], [], none), !.
+    Move = move([OldPiece], [NewPiece], DeleteRokades, Passant), !.
 
 
 %! path_moves(+Piece, +Pieces, +XDirection, +YDirection, -Moves)
