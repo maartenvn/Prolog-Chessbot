@@ -1,5 +1,21 @@
 :- module(positions, []).
 
+:- use_module("util").
+
+
+%! do_move(+Move, +Board, +Rokades, -NewBoard, -NewRokades)
+%
+% Update the board with a given move for a given piece.
+do_move(move(DeletePieces, AppendPieces, DeleteRokades), Board, Rokades, NewBoard, NewRokades) :-
+
+    % Pieces
+    util:delete_list(Board, DeletePieces, DeletedBoard),
+    append(DeletedBoard, AppendPieces, NewBoard),
+
+    % Rokades
+    util:delete_list(Rokades, DeleteRokades, NewRokades).
+
+
 %! all_possible_moves(+Color, +Board, +Rokades, -Moves)
 %
 %  All possible moves for all pieces on the given board of a given color.
@@ -185,10 +201,10 @@ pawn_promotion_moves(Piece, _, Moves) :-
 
     % Possible moves
     Moves = [
-        move([Piece], [piece(Color, queen, X/Y)]),
-        move([Piece], [piece(Color, horse, X/Y)]),
-        move([Piece], [piece(Color, tower, X/Y)]),
-        move([Piece], [piece(Color, bishop, X/Y)])
+        move([Piece], [piece(Color, queen, X/Y)], []),
+        move([Piece], [piece(Color, horse, X/Y)], []),
+        move([Piece], [piece(Color, tower, X/Y)], []),
+        move([Piece], [piece(Color, bishop, X/Y)], [])
     ], !.
 pawn_promotion_moves(_, _, []) :- !.
 
@@ -225,7 +241,7 @@ pawn_passant_moves_part(Piece, Board, XDifference, [Move | Moves]) :-
     forward(Color, Y, YNew),
 
     % Create the move
-    Move = move([Piece, OpponentPiece], [piece(Color, Type, XNew/YNew)]),
+    Move = move([Piece, OpponentPiece], [piece(Color, Type, XNew/YNew)], []),
 
     % Append the move to the list
     append([[Move]], Moves), !.
@@ -327,7 +343,7 @@ create_move(OldPiece, XNew/YNew, Board, Move) :- % Opponent on new position
     opponent_position(XNew/YNew, Color, Board, OpponentPiece),
 
     % Unify the move
-    Move = move([OldPiece, OpponentPiece], [NewPiece]), !.
+    Move = move([OldPiece, OpponentPiece], [NewPiece], []), !.
 
 create_move(OldPiece, XNew/YNew, Board, Move) :- % No piece on new position
     OldPiece = piece(Color, Type, _),
@@ -337,7 +353,7 @@ create_move(OldPiece, XNew/YNew, Board, Move) :- % No piece on new position
     empty_position(XNew/YNew, Board),
 
     % Unify the move
-    Move = move([OldPiece], [NewPiece]), !.
+    Move = move([OldPiece], [NewPiece], []), !.
 
 
 %! path_moves(+Piece, +Board, +XDirection, +YDirection, -Moves)

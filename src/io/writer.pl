@@ -1,7 +1,7 @@
 :- module(writer, []).
 
 :- use_module("parser").
-:- consult("../positions").
+:- use_module("../positions").
 
 
 %! write_board(+Board, +Rokades, +StartColor)
@@ -20,8 +20,27 @@ write_board(Board, Rokades, StartColor) :-
     
     % Write the output
     write_codes(OutRows),
-    write_codes(OutFinalRow),
-    write_codes("\n~\n").
+    write_codes(OutFinalRow).
+
+
+%! write_board_moves(+StartColor, +Board, +Rokades, +Moves)
+%
+%  Write all possible chess boards for the given board to stdout.
+write_board_moves(StartColor, Board, Rokades, [Move | Moves]) :-
+
+    % Do the move
+    positions:do_move(Move, Board, Rokades, NewBoard, NewRokades),
+
+    % Opponent is now at play
+    positions:opponent(StartColor, NextColor),
+
+    % Write the board to stdout
+    write_board(NewBoard, NewRokades, NextColor),
+    write("\n~\n"),
+
+    % Recursive call
+    write_board_moves(StartColor, Board, Rokades, Moves).
+write_board_moves(_, _, _, []).
 
 
 %! write_codes(+Codes)
@@ -39,7 +58,7 @@ extract_rows(Y, Board, [Row | Rows]) :-
     between(1, 8, Y), !,
 
     % Extract the row
-    row_pieces(Y, Board, Row),
+    positions:row_pieces(Y, Board, Row),
 
     % Next row
     YNext is Y - 1,
