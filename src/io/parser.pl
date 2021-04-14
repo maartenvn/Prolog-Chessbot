@@ -6,16 +6,22 @@
 % Interpret quoted strings as ASCII character codes.
 :- set_prolog_flag(double_quotes, codes).
 
+test :-
+    phrase_from_file(parse_board(Board, Rokades, Passant, StartColor), "boards/start.txt", [encoding(utf8),type(text)]),
+    write(Board),
+    write(Rokades),
+    write(Passant).
 
-%! parse_board(-Board, -Rokades, -StartColor)
+
+%! parse_board(-Board, -Rokades, -Passant, -StartColor)
 %
 %  Parse a chess board.
-parse_board(Board, Rokades, StartColor) --> 
-    parse_rows(8, Pieces, RokadesList, StartColor),
+parse_board(Board, Rokades, Passant, StartColor) --> 
+    parse_rows(8, PiecesList, RokadesList, Passant, StartColor),
     parse_final_row,
     {
         % Create a flat list of pieces to create the board
-        append(Pieces, Board),
+        append(PiecesList, Board),
 
         % Create a flat list of rokades to create the board
         append(RokadesList, Rokades)
@@ -25,19 +31,16 @@ parse_board(Board, Rokades, StartColor) -->
 %! parse_rows(+Y, -Pieces, -Rokades, -StartColor)
 %
 %  Parse all rows in a flat list of board positions.
-%  TODO: this could be cleaned up by a recursive statement
-parse_rows(8, [Pieces | PiecesRest], [Rokades | RokadesRest], StartColor) --> % Last row
-
+parse_rows(8, [Pieces | PiecesRest], [Rokades | RokadesRest], Passant, StartColor) --> % Last row
     % Parse the row
-    parse_border_row(8, black, Pieces, Rokades, StartColor),
+    parse_border_row(8, black, Pieces, Rokades, Passant, StartColor),
 
     % Recursive call
     parse_rows(7, PiecesRest, RokadesRest, StartColor), !.
 
 parse_rows(1, [Pieces], [Rokades], StartColor) --> % First row
-
     % Parse the row
-    parse_border_row(1, white, Pieces, Rokades, StartColor), !.
+    parse_border_row(1, white, Pieces, Rokades, Passant, StartColor), !.
 
 parse_rows(Y, [Pieces | PiecesRest], Rokades, StartColor) --> % Rows in between first & last row
     {
@@ -65,14 +68,24 @@ parse_row(Y, Pieces) -->
 %! parse_border_row(+Y, +Color, -Pieces, -Rokades, -StartColor)
 %
 %  Parse the first/last row of the chess board.
-parse_border_row(Y, Color, Pieces, Rokades, StartColor) -->
+parse_border_row(Y, Color, Pieces, Rokades, Passant, StartColor) -->
     parse_row_number(Y),
     parse_space,
     parse_pieces(1/Y, Pieces),
     parse_space,
-    parse_rokades(Color, Rokades),
+    parse_metadata(Color, Rokades, Passant),
     parse_current_player(Y, StartColor),
     parse_newline, !.
+
+
+%! parse_metadata(+Color, -Rokades, -Passant)
+%
+%  Parse metadata (possible rokades & passant posibility)
+parse_metadata(Color, Rokades, Passant) -->
+    "[",
+    parse_rokades(Color, Rokades),
+    parse_passant(Passant),
+    "]", !.
 
 
 %! parse_rokades(+Color, -Rokades)
@@ -81,28 +94,20 @@ parse_border_row(Y, Color, Pieces, Rokades, StartColor) -->
 %  
 %  This is verbose on purpose to allow re-use of the parser for generating output.
 parse_rokades(Color, [LongRokade, ShortRokade]) --> % Both rokades
-    "[",
     parse_rokade_piece(Color, long, LongRokade),
-    parse_rokade_piece(Color, short, ShortRokade),
-    "]", !.
+    parse_rokade_piece(Color, short, ShortRokade), !.
 
 parse_rokades(Color, [LongRokade]) --> % Only first rokade
-    "[",
     parse_rokade_piece(Color, long, LongRokade),
-    parse_space,
-    "]", !.
+    parse_space, !.
 
 parse_rokades(Color, [ShortRokade]) --> % Only second rokade
-    "[",
     parse_space,
-    parse_rokade_piece(Color, short, ShortRokade),
-    "]", !.
+    parse_rokade_piece(Color, short, ShortRokade), !.
 
 parse_rokades(_, []) --> % No rokades
-    "[",
     parse_space,
-    parse_space,
-    "]", !.
+    parse_space, !.
 
 %! parse_rokade_piece(+Color, +RokadeType, -Rokades)
 %
@@ -123,6 +128,14 @@ parse_rokade_piece(Color, short, Rokade) --> % Short
         Rokade = rokade(Color, short)
     }, !.
 
+%! parse_passant(-Passant)
+%
+%  Parse passant possibility
+parse_passant(X/Y) -->          % En-passant possible
+    parse_column_number(X),
+    parse_row_number(Y), !.
+
+parse_passant(none) --> !.      % En-passant not possible
 
 %! parse_current_player(+Y, -StartColor)
 %
@@ -145,7 +158,27 @@ parse_final_row -->
 %! parse_row_number(+RowNumber)
 %
 %  Parse a row number between 1 and 8.
-parse_row_number(RowNumber) --> integer(RowNumber).
+parse_row_number(RowNumber) -->
+    {
+        % RowNumber must be a valid Y-value
+        % (this is here to allow for re-using the parser as output writer)
+        between(1, 8, RowNumber)
+    },
+    integer(RowNumber).
+
+
+%! parse_column_number(+ColumnNumber)
+%
+%  Parse a column number between 1 and 8.
+parse_column_number(1) --> "a", !.
+parse_column_number(2) --> "b", !.
+parse_column_number(3) --> "c", !.
+parse_column_number(4) --> "d", !.
+parse_column_number(5) --> "e", !.
+parse_column_number(6) --> "f", !.
+parse_column_number(7) --> "g", !.
+parse_column_number(8) --> "h", !.
+
 
 %! parse_space()
 %

@@ -4,16 +4,16 @@
 :- use_module("../positions").
 
 
-%! write_board(+Board, +Rokades, +StartColor)
+%! write_board(+Board, +Rokades, +Passant, +StartColor)
 %
 %  Write a chess board to stdout.
-write_board(Board, Rokades, StartColor) :-
+write_board(Board, Rokades, Passant, StartColor) :-
     % Convert board & rokades in a format that could be used by the parser
-    extract_rows(8, Board, Rows),
+    extract_rows(8, Board, PiecesList),
     extract_rokades(Rokades, RokadesList),
 
     % Parse the rows output
-    parser:parse_rows(8, Rows, RokadesList, StartColor, OutRows, []),
+    parser:parse_rows(8, PiecesList, RokadesList, Passant, StartColor, OutRows, []),
 
     % Parse the final row output
     parser:parse_final_row(OutFinalRow, []),
@@ -23,10 +23,10 @@ write_board(Board, Rokades, StartColor) :-
     write_codes(OutFinalRow).
 
 
-%! write_board_moves(+StartColor, +Board, +Rokades, +Moves)
+%! write_board_moves(+StartColor, +Board, +Rokades, +Passant, +Moves)
 %
 %  Write all possible chess boards for the given board to stdout.
-write_board_moves(StartColor, Board, Rokades, [Move | Moves]) :-
+write_board_moves(StartColor, Board, Rokades, Passant, [Move | Moves]) :-
 
     % Do the move
     positions:do_move(Move, Board, Rokades, NewBoard, NewRokades),
@@ -35,7 +35,7 @@ write_board_moves(StartColor, Board, Rokades, [Move | Moves]) :-
     positions:opponent(StartColor, NextColor),
 
     % Write the board to stdout
-    write_board(NewBoard, NewRokades, NextColor),
+    write_board(NewBoard, NewRokades, Passant, NextColor),
     write("\n~\n"),
 
     % Recursive call
