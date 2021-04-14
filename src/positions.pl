@@ -1,3 +1,5 @@
+:- module(positions, []).
+
 %! all_possible_moves(+Color, +Board, +Rokades, -Moves)
 %
 %  All possible moves for all pieces on the given board of a given color.
@@ -70,7 +72,7 @@ possible_moves(Piece, Board, _, Moves) :-
    findall(Position, horse_position(Piece, Board, Position), Positions),
 
    % Convert positions into moves
-   positions_to_moves(Piece, Positions, Moves), !.
+   positions_to_moves(Piece, Board, Positions, Moves), !.
 
 % Pawn
 possible_moves(Piece, Board, _, Moves) :-
@@ -108,8 +110,8 @@ pawn_forward_moves(Piece, Board, Moves) :- % Pawn on start position (can move 2 
     empty_position(XNew2/YNew2, Board),
     
     % Create the moves
-    create_move(Piece, XNew1/YNew1, Move1),
-    create_move(Piece, XNew2/YNew2, Move2),
+    create_move(Piece, XNew1/YNew1, Board, Move1),
+    create_move(Piece, XNew2/YNew2, Board, Move2),
 
     % Append the moves to the moves list
     append([[Move1, Move2]], Moves), !.
@@ -124,7 +126,7 @@ pawn_forward_moves(Piece, Board, Moves) :- % Pawn (can move max 1 step forward)
     empty_position(XNew1/YNew1, Board),
 
     % Create the moves
-    create_move(Piece, XNew1/YNew1, Move1),
+    create_move(Piece, XNew1/YNew1, Board, Move1),
 
     % Append the moves to the moves list
     append([[Move1]], Moves), !.
@@ -164,7 +166,7 @@ pawn_diagonal_moves_part(Piece, Board, XDifference, Moves) :- % Left diagonal
     opponent_position(XNew/YNew, Color, Board),
 
     % Create the move
-    create_move(Piece, XNew/YNew, Move),
+    create_move(Piece, XNew/YNew, Board, Move),
 
     % Append the move to the list
     append([[Move]], Moves), !.
@@ -183,10 +185,10 @@ pawn_promotion_moves(Piece, _, Moves) :-
 
     % Possible moves
     Moves = [
-        move(Piece, piece(Color, queen, X/Y), [], []),
-        move(Piece, piece(Color, horse, X/Y), [], []),
-        move(Piece, piece(Color, tower, X/Y), [], []),
-        move(Piece, piece(Color, bishop, X/Y), [], [])
+        move([Piece], [piece(Color, queen, X/Y)]),
+        move([Piece], [piece(Color, horse, X/Y)]),
+        move([Piece], [piece(Color, tower, X/Y)]),
+        move([Piece], [piece(Color, bishop, X/Y)])
     ], !.
 pawn_promotion_moves(_, _, []) :- !.
 
@@ -223,7 +225,7 @@ pawn_passant_moves_part(Piece, Board, XDifference, [Move | Moves]) :-
     forward(Color, Y, YNew),
 
     % Create the move
-    Move = move(Piece, piece(Color, Type, XNew/YNew), [OpponentPiece], []),
+    Move = move([Piece, OpponentPiece], [piece(Color, Type, XNew/YNew)]),
 
     % Append the move to the list
     append([[Move]], Moves), !.
@@ -269,7 +271,7 @@ square_moves(OldPiece, Board, Moves) :-
     findall(Position, square_position(OldPiece, Board, Position), Positions),
 
     % Convert positions into moves
-    positions_to_moves(OldPiece, Positions, Moves).
+    positions_to_moves(OldPiece, Board, Positions, Moves).
 
 
 %! cross_moves(+OldPiece, +Board, -Moves)
@@ -299,30 +301,43 @@ diagonal_moves(OldPiece, Board, Moves) :-
     append([TopRightMoves, TopLeftMoves, BottomRightMoves, BottomLeftMoves], Moves).
 
 
-%! positions_to_moves(+OldPiece, +Positions, -Moves)
+%! positions_to_moves(+OldPiece, +Board, +Positions, -Moves)
 %
 %  Corresponding moves for a given set of positions
-positions_to_moves(OldPiece, [Position | Positions], [Move | Moves]) :-
+positions_to_moves(OldPiece, Board, [Position | Positions], [Move | Moves]) :-
 
     % Construct the move
-    create_move(OldPiece, Position, Move),
+    create_move(OldPiece, Position, Board, Move),
     
     % Recursive Call
-    positions_to_moves(OldPiece, Positions, Moves), !.
-positions_to_moves(_, [], []) :- !.
+    positions_to_moves(OldPiece, Board, Positions, Moves), !.
+positions_to_moves(_, _, [], []) :- !.
 
 
-%! create_move(+OldPiece, +XNew/YNew, -Move)
+%! create_move(+OldPiece, +XNew/YNew, +Board, -Move)
 %
 %  Create a move for a given piece and position
 %
 %  TODO: this name is not very prolog (create_move is not a fact?)
-create_move(OldPiece, XNew/YNew, Move) :-
+create_move(OldPiece, XNew/YNew, Board, Move) :- % Opponent on new position
     OldPiece = piece(Color, Type, _),
     NewPiece = piece(Color, Type, XNew/YNew),
 
+    % Opponent at the new position
+    opponent_position(XNew/YNew, Color, Board, OpponentPiece),
+
     % Unify the move
-    Move = move(OldPiece, NewPiece, [], []).
+    Move = move([OldPiece, OpponentPiece], [NewPiece]), !.
+
+create_move(OldPiece, XNew/YNew, Board, Move) :- % No piece on new position
+    OldPiece = piece(Color, Type, _),
+    NewPiece = piece(Color, Type, XNew/YNew),
+
+    % Opponent at the new position
+    empty_position(XNew/YNew, Board),
+
+    % Unify the move
+    Move = move([OldPiece], [NewPiece]), !.
 
 
 %! path_moves(+Piece, +Board, +XDirection, +YDirection, -Moves)
@@ -342,7 +357,7 @@ path_moves(OldPiece, Board, XDirection, YDirection, [Move | Moves]) :-
     NewPiece = piece(Color, Type, XNew, YNew),
 
     % Create the move
-    create_move(OldPiece, XNew/YNew, Move),
+    create_move(OldPiece, XNew/YNew, Board, Move),
 
     % New position must be valid
     valid_position(XNew/YNew),
@@ -361,7 +376,7 @@ path_moves(OldPiece, Board, XDirection, YDirection, [Move]) :-
     YNew is Y + YDirection,
 
     % Create the move
-    create_move(OldPiece, XNew/YNew, Move),
+    create_move(OldPiece, XNew/YNew, Board, Move),
 
     % New position must be valid
     valid_position(XNew/YNew),
