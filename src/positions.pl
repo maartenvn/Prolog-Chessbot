@@ -160,5 +160,6 @@ empty_or_opponent_position(X/Y, _, Pieces) :- empty_position(X/Y, Pieces), !.
 %! opponent(+Color, -OpponentColor)
 %
 %  Opponent color for a given color
+%  TODO: move to pieces.pl
 opponent(white, black).
 opponent(black, white).
