@@ -36,15 +36,22 @@ do_move(Move, CurrentState, NewState) :-
     NewState = state(NewPieces, NewColor, NewRokades, NewPassant).
 
 
-%! all_possible_moves(+State, -Moves)
+%! all_possible_moves/2(+State, -Moves)
 %
 %  All possible moves for the current state.
 all_possible_moves(State, Moves) :-
-    state:pieces(State, Pieces),
     state:currentcolor(State, CurrentColor),
+    all_possible_moves(CurrentColor, State, Moves).
+
+
+%! all_possible_moves/3(+Color, +State, -Moves)
+%
+%  All possible moves for the current state for a given color.
+all_possible_moves(Color, State, Moves) :-
+    state:pieces(State, Pieces),
 
     % Get the pieces for the given color
-    pieces:color_pieces(CurrentColor, Pieces, ColorPieces),
+    pieces:color_pieces(Color, Pieces, ColorPieces),
 
     % Get all possible moves for the pieces
     % TODO: merge this statement inside this predicate using maplist & append.
@@ -73,14 +80,14 @@ all_possible_moves_for_pieces([], _, []) :- !.
 
 % King
 possible_moves(Piece, State, Moves) :-
-    Piece = piece(_, king, _),
+    pieces:type(Piece, king),
 
     % King can move in a square
     square_moves(Piece, State, Moves), !.
 
 % Queen
 possible_moves(Piece, State, Moves) :-
-    Piece = piece(_, queen, _),
+    pieces:type(Piece, queen),
 
     % Queen can move diagonally or in a cross
     cross_moves(Piece, State, CrossMoves),
@@ -91,21 +98,21 @@ possible_moves(Piece, State, Moves) :-
 
 % Tower
 possible_moves(Piece, State, Moves) :-
-    Piece = piece(_, tower, _),
+    pieces:type(Piece, tower),
 
     % Tower can move in a cross
     cross_moves(Piece, State, Moves), !.
 
 % Bishop
 possible_moves(Piece, State, Moves) :-
-    Piece = piece(_, bishop, _),
+    pieces:type(Piece, bishop),
 
     % Bishop can move in diagonally.
     diagonal_moves(Piece, State, Moves), !.
 
 % Horse
 possible_moves(Piece, State, Moves) :-
-   Piece = piece(_, horse, _),
+    pieces:type(Piece, horse),
 
    % Horse positions
    findall(Position, positions:horse_position(Piece, State, Position), Positions),
@@ -343,7 +350,7 @@ path_moves(Piece, State, XDirection, YDirection, [Move | Moves]) :-
     NewPiece = piece(Color, Type, XNew/YNew),
 
     % Create the move
-    create_move(X/Y, XNew/YNew, State, Move),
+    create_piece_move(Piece, XNew/YNew, State, Move),
 
     % New position must be valid
     positions:valid_position(XNew/YNew),
@@ -363,7 +370,7 @@ path_moves(Piece, State, XDirection, YDirection, [Move]) :-
     YNew is Y + YDirection,
 
     % Create the move
-    create_move(X/Y, XNew/YNew, State, Move),
+    create_piece_move(Piece, XNew/YNew, State, Move),
 
     % New position must be valid
     positions:valid_position(XNew/YNew),
@@ -377,10 +384,9 @@ path_moves(_, _, _, _, []) :- !.
 %
 %  Corresponding moves for a given set of positions
 positions_to_moves(Piece, State, [NextPosition | NextPositions], [Move | Moves]) :-
-    pieces:position(Piece, CurrentPosition),
 
     % Construct the move
-    create_move(CurrentPosition, NextPosition, State, Move),
+    create_piece_move(Piece, NextPosition, State, Move),
     
     % Recursive Call
     positions_to_moves(Piece, State, NextPositions, Moves), !.
@@ -396,29 +402,44 @@ create_move(CurrentPosition, NewPosition, State, Move) :-
 
 %! create_move/6(+CurrentPosition, +NewPosition, +State, +DeleteRokades, +Passant, -Move)
 %
+%  Create a move for given positions, rokades to delete and en-passant possability
+create_move(CurrentPosition, NewPosition, State, DeleteRokades, Passant, Move) :-
+    state:position_piece(CurrentPosition, State, CurrentPiece),
+    create_piece_move(CurrentPiece, NewPosition, State, DeleteRokades, Passant, Move).
+
+
+%! create_move/4(+CurrentPiece, +NewPosition, +State, -Move)
+%
+%  Create a move from a given position to a new position.
+create_piece_move(CurrentPiece, NewPosition, State, Move) :-
+    create_piece_move(CurrentPiece, NewPosition, State, [], none, Move).
+
+
+%! create_move/6(+CurrentPiece, +NewPosition, +State, +DeleteRokades, +Passant, -Move)
+%
 %  Create a move for a given piece, position, rokades to delete and en-passant possability
-create_move(CurrentPosition, NewPosition, State, DeleteRokades, Passant, Move) :- % Opponent on new position
-    state:piece(CurrentPosition, State, piece(Color, Type, _)),
+create_piece_move(CurrentPiece, NewPosition, State, DeleteRokades, Passant, Move) :- % Opponent on new position
+    pieces:color(CurrentPiece, Color),
+    pieces:type(CurrentPiece, Type),
 
     % Opponent at the new position
     positions:opponent_position(NewPosition, Color, State, OpponentPiece),
 
-    % Create the pieces
-    CurrentPiece = piece(Color, Type, CurrentPosition),
-    NewPiece     = piece(Color, Type, NewPosition),
+    % Create the new piece
+    NewPiece = piece(Color, Type, NewPosition),
 
     % Unify the move
     Move = move([CurrentPiece, OpponentPiece], [NewPiece], DeleteRokades, Passant), !.
 
-create_move(CurrentPosition, NewPosition, State, DeleteRokades, Passant, Move) :-  % No piece on new position
-    state:piece(CurrentPosition, State, piece(Color, Type, _)),
+create_piece_move(CurrentPiece, NewPosition, State, DeleteRokades, Passant, Move) :-  % No piece on new position
+    pieces:color(CurrentPiece, Color),
+    pieces:type(CurrentPiece, Type),
 
     % Empty new position
     positions:empty_position(NewPosition, State),
 
-    % Create the pieces
-    CurrentPiece = piece(Color, Type, CurrentPosition),
-    NewPiece     = piece(Color, Type, NewPosition),
+    % Create the new piece
+    NewPiece = piece(Color, Type, NewPosition),
 
     % Unify the move
     Move = move([CurrentPiece], [NewPiece], DeleteRokades, Passant), !.

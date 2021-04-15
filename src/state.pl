@@ -32,10 +32,10 @@ rokades(state(_, _, Rokades, _), Rokades).
 passant(state(_, _, _, Passant), Passant).
 
 
-%! piece(+Position, +State, -Piece)
+%! position_piece(+Position, +State, -Piece)
 %
 %  Piece at a given position for the given state.
-piece(Position, State, piece(Color, Type, Position)) :-
+position_piece(Position, State, piece(Color, Type, Position)) :-
     pieces(State, Pieces),
     
     % Select the piece from the pieces list

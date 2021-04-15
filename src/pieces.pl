@@ -21,10 +21,12 @@ type(piece(_, Type, _), Type).
 color(piece(Color, _, _), Color).
 
 
-%! color_pieces(+Color, +Board, -ColorPieces)
+%! color_pieces(+Color, +Pieces, -ColorPieces)
 %
-%  Unify all pieces for a given Color from a given Board with BoardPlayer
+%  Unify all pieces for a given Color from the given state.
 color_pieces(Color, Pieces, ColorPieces) :-
+
+    % Extract the pieces that match the given color.
     include(piece_color(Color), Pieces, ColorPieces).
 
 
@@ -67,3 +69,89 @@ row_pieces(_, [], []) :- !.
 %  Sorted list for a given list of pieces.
 sorted_pieces(Pieces, SortedPieces) :-
     sort(Pieces, SortedPieces).
+
+
+%! checkmate/2(+State, +Color)
+%
+% If a king with Color is checkmate.
+% The king is is checkmate if it has no possible moves left.
+checkmate(State, Color) :-
+    state:pieces(State, Pieces),
+    KingPiece = piece(Color, king, _),
+
+    % Position of the king of the given color
+    select(KingPiece, Pieces, _), !,
+
+    % Possible moves for the king
+    moves:possible_moves(KingPiece, State, KingMoves),
+
+    % Helper
+    checkmate(KingPiece, State, KingMoves).
+
+
+%! checkmate/3(+KingPiece, +State, +Moves)
+%
+% If the given king is checkmate for the given set of opponent pieces and the given set of moves
+checkmate(KingPiece, State, [Move | Moves]) :-
+    KingPiece = piece(Color, king, _),
+    NewKingPiece = piece(Color, king, _),
+
+    % Do the current move
+    moves:do_move(Move, State, NewState),
+    state:pieces(NewState, NewPieces),
+
+    % Position of the king after the move
+    select(NewKingPiece, NewPieces, _), !,
+
+    % Check if the king is still not safe by doing this move
+    not(is_safe(NewKingPiece, NewState)), !,
+
+    % Recursive call
+    checkmate(KingPiece, State, Moves), !.
+
+checkmate(_, _, []) :- !.
+
+
+%! check(+State, +Color)
+%
+% If a king with Color is in-check.
+% The king is now in range of attack by the opponent player
+check(State, Color) :-
+    state:pieces(State, Pieces),
+    KingPiece = piece(Color, king, _),
+
+    % Position of the king of the given color
+    select(KingPiece, Pieces, _), !,
+
+    % Check if any opponent piece can attack the king of the given color
+    not(is_safe(KingPiece, State)).
+
+
+%! is_safe(+Piece, +State, +OpponentPieces)
+%
+%  If a given piece is safe from a potential attack.
+is_safe(Piece, State) :-
+    Piece = piece(Color, _, _),
+    
+    % Opponent Color
+    positions:opponent(Color, OpponentColor),
+
+    % All possible moves by the opponent
+    moves:all_possible_moves(OpponentColor, State, Moves),
+
+    % Check if the given piece is part of any of the moves
+    is_safe_for_moves(Piece, Moves).
+
+
+%! is_safe_for_moves(+Piece, +Moves)
+%
+%  if a given piece is safe for a given set of moves.
+is_safe_for_moves(Piece, [Move | Moves]) :-
+    Move = move(DeletePieces, _, _, _),
+    
+    % Move must not be part of the pieces to delete
+    not(member(Piece, DeletePieces)),
+
+    % Recursive call
+    is_safe_for_moves(Piece, Moves), !.
+is_safe_for_moves(_, []) :- !.
