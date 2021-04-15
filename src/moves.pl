@@ -104,7 +104,7 @@ possible_moves(Piece, board(Pieces, _, Passant), Moves) :-
     pawn_forward_moves(Piece, Pieces, ForwardMoves),
     pawn_diagonal_moves(Piece, Pieces, DiagonalMoves),
     pawn_promotion_moves(Piece, Pieces, PromitionMoves),
-    pawn_passant_moves(Piece, Pieces, Passant, PassantMoves),
+    pawn_passant_moves(Piece, Passant, PassantMoves),
 
     % Merge possible moves
     append([ForwardMoves, DiagonalMoves, PromitionMoves, PassantMoves], Moves), !.
@@ -211,10 +211,10 @@ pawn_promotion_moves(OldPiece, Moves) :-
 pawn_promotion_moves(_, _, []) :- !.
 
 
-%! pawn_passant_moves(+Piece, +Pieces, -Moves)
+%! pawn_passant_moves(+Piece, +Passant, -Moves)
 %
 %  Move for the given pawn if an en-passant move is possible
-pawn_passant_moves(Piece, Pieces, Passant, Moves) :-
+pawn_passant_moves(Piece, Passant, Moves) :-
     Piece   = piece(PieceColor, pawn, _),
     Passant = passant(PassantColor, _),
     
@@ -222,22 +222,22 @@ pawn_passant_moves(Piece, Pieces, Passant, Moves) :-
     positions:opponent(PieceColor, PassantColor),
         
     % En-pasant for both directions
-    pawn_passant_moves_part(Piece, Pieces, Passant, -1, LeftMoves),
-    pawn_passant_moves_part(Piece, Pieces, Passant, 1, RightMoves),
+    pawn_passant_moves_part(Piece, Passant, -1, LeftMoves),
+    pawn_passant_moves_part(Piece, Passant, 1, RightMoves),
 
     % Merge the 2 lists
     append([LeftMoves, RightMoves], Moves), !.
-pawn_passant_moves(_, _, _, []) :- !.
+pawn_passant_moves(_, _, []) :- !.
 
 
-%! pawn_passant_moves_part(+Piece, +Pieces, +Passant, +XDifference, -Moves)
+%! pawn_passant_moves_part(+Piece, +Passant, +XDifference, -Moves)
 %
 %  Moves for the given pawn doing en-passant either left or right
 %  XDifference = 1: right en-passant move
 %  XDifference = -1: left en-passant move
 %
 %  TODO: List of moves to single move (because a list is useless here)
-pawn_passant_moves_part(Piece, Pieces, Passant, XDifference, [Move]) :-
+pawn_passant_moves_part(Piece, Passant, XDifference, [Move]) :-
     Piece = piece(Color, pawn, X/Y),
     Passant = passant(PassantColor, XPassant/YPassant),
 
@@ -253,7 +253,7 @@ pawn_passant_moves_part(Piece, Pieces, Passant, XDifference, [Move]) :-
 
     % Create the move
     Move = move([Piece, OpponentPiece], [piece(Color, pawn, XNew/YNew)], [], none), !.
-pawn_passant_moves_part(_, _, _, _, []) :- !.
+pawn_passant_moves_part(_, _, _, []) :- !.
 
 
 %! square_moves(+OldPiece, +Pieces, -Moves)
@@ -355,7 +355,7 @@ path_moves(OldPiece, Pieces, XDirection, YDirection, [Move | Moves]) :-
     YNew is Y + YDirection,
 
     % Unify the new piece
-    NewPiece = piece(Color, Type, XNew, YNew),
+    NewPiece = piece(Color, Type, XNew/YNew),
 
     % Create the move
     create_move(OldPiece, XNew/YNew, Pieces, Move),
