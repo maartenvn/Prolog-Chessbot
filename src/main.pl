@@ -12,8 +12,6 @@ handle_main([TEST]) :- % Test Mode TODO: must be "TEST"
     % Load the data from the stdin stream and parse it.
     phrase_from_stream(parser:parse_board(Board, StartColor), current_input),
 
-    write(Board),
-
     % Get all possible moves for the given board
     moves:all_possible_moves(StartColor, Board, Moves),
 

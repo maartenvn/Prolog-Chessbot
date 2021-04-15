@@ -12,7 +12,7 @@ pawn_start_position(_/7, black).
 %
 %  Pawn is on it's promotion position.
 pawn_promotion_position(_/8, white).
-pawn_promotion_position( _/1, black).
+pawn_promotion_position(_/1, black).
 
 
 %! pawn_passant_position(+X/+Y, +Color)

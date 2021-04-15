@@ -110,7 +110,7 @@ possible_moves(Piece, board(Pieces, _, _), Moves) :-
     append([ForwardMoves, DiagonalMoves, PromitionMoves/*, PassantMoves*/], Moves), !.
 
 
-%! pawn_moves(+OldPiece, +Pieces, -Passant, -Moves)
+%! pawn_moves(+OldPiece, +Pieces, -Moves)
 % 
 %  Moves for the pawn going forward
 pawn_forward_moves(Piece, Pieces, Moves) :- % Pawn on start position (can move 2 steps forward)
@@ -120,26 +120,23 @@ pawn_forward_moves(Piece, Pieces, Moves) :- % Pawn on start position (can move 2
     positions:pawn_start_position(X/Y, Color),
 
     % First position must be valid & empty (otherwise the pawn is not able to move 2 steps forward)
-    positions:forward_position(X/Y, Color, XNew/YNew),
+    positions:forward_position(X/Y, Color, XNew1/YNew1),
     positions:valid_position(XNew1/YNew1),
     positions:empty_position(XNew1/YNew1, Pieces),
 
-    % First position is a possible passant move for the next player
-    Passant = XNew1/YNew1,
-
     % Second position must be valid & empty
-    positions:forward_position(XNew/YNew, Color, XNew2/YNew2),
+    positions:forward_position(XNew1/YNew1, Color, XNew2/YNew2),
     positions:valid_position(XNew2/YNew2),
     positions:empty_position(XNew2/YNew2, Pieces),
-    
+
     % Create the moves
-    create_move(Piece, XNew1/YNew1, Pieces, Move1, [], XNew1/YNew1), % En-passant possibility
-    create_move(Piece, XNew2/YNew2, Pieces, Move2),
+    create_move(Piece, XNew1/YNew1, Pieces, Move1), % En-passant possibility
+    create_move(Piece, XNew2/YNew2, Pieces, [], passant(Color, XNew1/YNew1), Move2),
 
     % Append the moves to the moves list
     append([[Move1, Move2]], Moves), !.
 
-pawn_forward_moves(Piece, Pieces, none, Moves) :- % Pawn (can move max 1 step forward)
+pawn_forward_moves(Piece, Pieces, Moves) :- % Pawn (can move max 1 step forward)
     Piece = piece(Color, _, X/Y),
 
     % First position must be valid & empty
@@ -153,7 +150,7 @@ pawn_forward_moves(Piece, Pieces, none, Moves) :- % Pawn (can move max 1 step fo
     % Append the moves to the moves list
     append([[Move1]], Moves), !.
 
-pawn_forward_moves(_, _, none, []) :- !. % Pawn cannot move forward
+pawn_forward_moves(_, _, []) :- !. % Pawn cannot move forward
 
 
 %! pawn_diagonal_moves(+OldPiece, +Pieces, -Moves)

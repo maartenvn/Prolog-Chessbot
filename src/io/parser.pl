@@ -27,7 +27,11 @@ parse_board(Board, StartColor) -->
         append(RokadesList, Rokades),
 
         % Create board
-        Board = board(Pieces, Rokades, Passant)
+        Board = board(Pieces, Rokades, Passant),
+
+        % Set passant to "none" if no en-passant move was unified
+        % TODO: this is a dirty hack, ask for an alternative
+        (Passant = none ; true)
     }.
 
 
@@ -87,7 +91,7 @@ parse_border_row(Y, Color, Pieces, Rokades, Passant, StartColor) -->
 parse_metadata(Color, Rokades, Passant) -->
     "[",
     parse_rokades(Color, Rokades),
-    parse_passant(Passant),
+    parse_passant(Color, Passant),
     "]", !.
 
 
@@ -124,21 +128,32 @@ parse_rokade_piece(Color, long, Rokade) --> % Large
     }, !.
 
 parse_rokade_piece(Color, short, Rokade) --> % Short
-    parse_piece(Color, king), 
+    parse_piece(Color, king),
 
     % Create the rokade
     {
         Rokade = rokade(Color, short)
     }, !.
 
-%! parse_passant(-Passant)
+
+%! parse_passant(+Color, -Passant)
 %
 %  Parse passant possibility
-parse_passant(X/Y) -->          % En-passant possible
+parse_passant(Color, passant(Color, X/Y)) --> % En-passant possible
+    parse_column_number(X),
+    parse_row_number(Y), !.
+parse_passant(_, _) --> !.                    % En-passant not possible
+
+
+%! parse_passant_position(-X/-Y)
+%
+%  Parse passant possibility position
+parse_passant_position(X/Y) -->          % En-passant possible
     parse_column_number(X),
     parse_row_number(Y), !.
 
-parse_passant(none) --> !.      % En-passant not possible
+parse_passant_position(_) --> !.                 % En-passant not possible
+
 
 %! parse_current_player(+Y, -StartColor)
 %

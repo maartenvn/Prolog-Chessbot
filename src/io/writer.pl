@@ -43,8 +43,8 @@ write_board_moves(StartColor, Board, [Move | Moves]) :-
     write("\n~\n"),
 
     % Recursive call
-    write_board_moves(StartColor, Board, Moves).
-write_board_moves(_, _, []).
+    write_board_moves(StartColor, Board, Moves), !.
+write_board_moves(_, _, []) :- !.
 
 
 %! write_codes(+Codes)
