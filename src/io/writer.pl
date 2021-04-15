@@ -1,16 +1,20 @@
 :- module(writer, []).
 
 :- use_module("parser").
+:- use_module("../state").
 :- use_module("../positions").
 :- use_module("../moves").
 :- use_module("../pieces").
 
 
-%! write_board(+Board, +StartColor)
+%! write_state(+State)
 %
-%  Write a chess board to stdout.
-write_board(Board, StartColor) :-
-    Board = board(Pieces, Rokades, Passant),
+%  Write a chess game state to stdout.
+write_state(State) :-
+    state:pieces(State, Pieces),
+    state:currentcolor(State, StartColor),
+    state:rokades(State, Rokades),
+    state:passant(State, Passant),
 
     % Convert board & rokades in a format that could be used by the parser
     extract_rows(8, Pieces, PiecesList),
@@ -27,24 +31,20 @@ write_board(Board, StartColor) :-
     write_codes(OutFinalRow).
 
 
-%! write_board_moves(+StartColor, +Board, +Moves)
+%! write_state_moves(+State, +Moves)
 %
-%  Write all possible chess boards for the given set of moves to stdout.
-write_board_moves(StartColor, Board, [Move | Moves]) :-
-
+%  Write all possible chess states for the given set of moves to stdout.
+write_state_moves(CurrentState, [Move | Moves]) :-
     % Do the move
-    moves:do_move(Move, Board, NewBoard),
-
-    % Opponent is now at play
-    positions:opponent(StartColor, NextColor),
+    moves:do_move(Move, CurrentState, NextState),
 
     % Write the board to stdout
-    write_board(NewBoard, NextColor),
+    write_state(NextState),
     write("\n~\n"),
 
     % Recursive call
-    write_board_moves(StartColor, Board, Moves), !.
-write_board_moves(_, _, []) :- !.
+    write_state_moves(CurrentState, Moves), !.
+write_state_moves(_, []) :- !.
 
 
 %! write_codes(+Codes)

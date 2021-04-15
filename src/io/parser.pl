@@ -8,30 +8,29 @@
 
 
 test :-
-    phrase_from_file(parse_board(Board, StartColor), "boards/start.txt", [encoding(utf8),type(text)]),
-    write(Board),
-    write(StartColor).
+    phrase_from_file(parse_state(State), "boards/start.txt", [encoding(utf8),type(text)]),
+    write(State).
 
 
-%! parse_board(-Board, StartColor)
+%! parse_state(-State, StartColor)
 %
-%  Parse a chess board.
-parse_board(Board, StartColor) --> 
+%  Parse a chess game state.
+parse_state(State) --> 
     parse_rows(8, PiecesList, RokadesList, Passant, StartColor),
     parse_final_row,
     {
-        % Create a flat list of pieces to create the board
+        % Create a flat list of pieces
         append(PiecesList, Pieces),
 
-        % Create a flat list of rokades to create the board
+        % Create a flat list of rokades
         append(RokadesList, Rokades),
 
-        % Create board
-        Board = board(Pieces, Rokades, Passant),
+        % Create state
+        State = state(Pieces, StartColor, Rokades, Passant),
 
         % Set passant to "none" if no en-passant move was unified
         % TODO: this is a dirty hack, ask for an alternative
-        (Passant = none ; true)
+        (Passant = none, ! ; true)
     }.
 
 

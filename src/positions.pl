@@ -1,5 +1,8 @@
 :- module(positions, []).
 
+:- use_module("state").
+:- use_module("pieces").
+
 
 %! pawn_start_position(+X/+Y, +Color)
 %
@@ -31,10 +34,10 @@ forward_position(X/Y, white, X/YNew) :- YNew is Y + 1.
 forward_position(X/Y, black, X/YNew) :- YNew is Y - 1.
 
 
-%! horse_position(+Piece, +Pieces, -Position)
+%! horse_position(+Piece, +State, -Position)
 %
 %  Move that could be done by the horse from a given piece
-horse_position(piece(Color, _, X/Y), Pieces, XPos/YPos) :-
+horse_position(piece(Color, _, X/Y), State, XPos/YPos) :-
 
     % TODO: create seperate predicate to use for [N - 1, N + 1]
     XMinus2 is X - 2,
@@ -51,7 +54,7 @@ horse_position(piece(Color, _, X/Y), Pieces, XPos/YPos) :-
     valid_position(XPos/YPos),
 
     % Position must be empty or taken by an opponent piece
-    empty_or_opponent_position(XPos/YPos, Color, Pieces),
+    empty_or_opponent_position(XPos/YPos, Color, State),
 
     % Difference in positions
     XDiff is X - XPos,
@@ -73,11 +76,12 @@ horse_position(piece(Color, _, X/Y), Pieces, XPos/YPos) :-
     member((XDiff, YDiff), PossibleDifferences).
 
 
-%! square_position(+Piece, +Pieces, -XPos/-YPos)
+%! square_position(+Piece, +State, -XPos/-YPos)
 %
 %  Position in a square around a given piece
-square_position(OldPiece, Pieces, XPos/YPos) :-
-    OldPiece = piece(Color, _, X/Y),
+square_position(Piece, State, XPos/YPos) :-
+    pieces:color(Piece, Color),
+    pieces:position(Piece, X/Y),
 
     % TODO: create seperate predicate to use for [N - 1, N + 1]
     XMinus is X - 1,
@@ -97,7 +101,7 @@ square_position(OldPiece, Pieces, XPos/YPos) :-
     valid_position(XPos/YPos),
 
     % New position must be empty or taken by an opponent piece
-    empty_or_opponent_position(XPos/YPos, Color, Pieces).
+    empty_or_opponent_position(XPos/YPos, Color, State).
 
 
 %! valid_position(+X/+Y)
@@ -115,23 +119,19 @@ valid_position(X/Y) :-
     between(1, 8, Y).
 
 
-%! opponent_position(+X/+Y, +Color, +Pieces)
+%! opponent_position/3(+X/+Y, +Color, +State)
 %
 %  Check if a given position is taken by a piece of the opponent player.
-opponent_position(X/Y, Color, Pieces) :-
-
-    % Opponent color
-    opponent(Color, OpponentColor),
-
-    % Piece must be of the opponent's color
-    member(piece(OpponentColor, _, X/Y), Pieces).
+opponent_position(X/Y, Color, State) :-
+    opponent_position(X/Y, Color, State, _).
 
 
-%! opponent_position(+X/+Y, +Color, +Pieces, -OpponentPiece)
+%! opponent_position/4(+X/+Y, +Color, +State, -OpponentPiece)
 %
 %  Check if a given position is taken by a piece of the opponent player.
 %  Unify the piece with OpponentPiece.
-opponent_position(X/Y, Color, Pieces, OpponentPiece) :-
+opponent_position(X/Y, Color, State, OpponentPiece) :-
+    state:pieces(State, Pieces),
 
     % Opponent color
     opponent(Color, OpponentColor),
@@ -143,18 +143,21 @@ opponent_position(X/Y, Color, Pieces, OpponentPiece) :-
     member(OpponentPiece, Pieces).
 
 
-%! empty_position(+X/+Y, +Color, +Pieces)
+%! empty_position(+X/+Y, +Color, +State)
 %
 %  Check if a given position is not taken by a piece.
-empty_position(X/Y, Pieces) :-
+empty_position(X/Y, State) :-
+    state:pieces(State, Pieces),
+
+    % Location must be empty
     not(member(piece(_, _, X/Y), Pieces)).
 
 
-%! empty_or_opponent_position(+X/+Y, +Color, +Pieces)
+%! empty_or_opponent_position(+X/+Y, +Color, +State)
 %
 %  Check if a position is empty or taken by a piece of the opponent player.
-empty_or_opponent_position(X/Y, Color, Pieces) :- opponent_position(X/Y, Color, Pieces), !.
-empty_or_opponent_position(X/Y, _, Pieces) :- empty_position(X/Y, Pieces), !.
+empty_or_opponent_position(X/Y, Color, State) :- opponent_position(X/Y, Color, State), !.
+empty_or_opponent_position(X/Y, _, State) :- empty_position(X/Y, State), !.
 
 
 %! opponent(+Color, -OpponentColor)
