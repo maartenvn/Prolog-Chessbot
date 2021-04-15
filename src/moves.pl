@@ -4,11 +4,20 @@
 :- use_module("pieces").
 :- use_module("util").
 
-%! do_move(+Move, +Board, -NewBoard)
+%! all_possible_boards(+CurrentBoard, +Moves, +NewBoards)
+%
+%  Generate a new board for every move and append it to a list.
+all_possible_boards(CurrentBoard, [Move | Moves], [NewBoard | NewBoards]) :-
+    do_move(Move, CurrentBoard, NewBoard),
+    all_possible_boards(CurrentBoard, Moves, NewBoards), !.
+all_possible_boards(_, [], []) :- !.
+
+
+%! do_move(+Move, +CurrentBoard, -NewBoard)
 %
 % Update the board with a given move for a given piece.
-do_move(move(DeletePieces, AppendPieces, DeleteRokades, NewPassant), Board, NewBoard) :-
-    Board = board(OldPieces, OldRokades, _),
+do_move(move(DeletePieces, AppendPieces, DeleteRokades, NewPassant), CurrentBoard, NewBoard) :-
+    CurrentBoard = board(OldPieces, OldRokades, _),
     NewBoard = board(NewPieces, NewRokades, NewPassant),
 
     % Delete pieces
