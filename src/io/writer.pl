@@ -64,7 +64,10 @@ extract_rows(Y, Pieces, [Row | Rows]) :-
     between(1, 8, Y), !,
 
     % Extract the row
-    pieces:row_pieces(Y, Pieces, Row),
+    pieces:row_pieces(Y, Pieces, UnsortedRow),
+
+    % Sort the row
+    pieces:sorted_pieces(UnsortedRow, Row),
 
     % Next row
     YNext is Y - 1,

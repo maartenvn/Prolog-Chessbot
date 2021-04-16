@@ -3,6 +3,7 @@
 :- use_module("positions").
 :- use_module("moves").
 
+
 %! position(+Piece, -Position)
 %
 %  Extract the position from the given piece.
@@ -19,22 +20,6 @@ type(piece(_, Type, _), Type).
 %
 %  Extract the color from the given piece.
 color(piece(Color, _, _), Color).
-
-
-%! color_pieces(+Color, +Pieces, -ColorPieces)
-%
-%  Unify all pieces for a given Color from the given state.
-color_pieces(Color, Pieces, ColorPieces) :-
-
-    % Extract the pieces that match the given color.
-    include(piece_color(Color), Pieces, ColorPieces).
-
-
-%! piece_color(-Color, +Piece)
-%
-%  Extract the color of a piece
-%  This can be used as a predicate in predicates like "include"
-piece_color(Color, piece(Color, _, _)).
 
 
 %! row_pieces(+Y, +Pieces, -RowPieces)
@@ -64,11 +49,38 @@ row_pieces(Y, [Piece | Pieces], RowPieces) :- % No match
 row_pieces(_, [], []) :- !.
 
 
-%! sorted_pieces(+Pieces, -SortedPieces)
+%! sorted_pieces/2(+Pieces, -SortedPieces)
 %
-%  Sorted list for a given list of pieces.
+%  Sorted list for a given list of pieces by X-coordinate.
 sorted_pieces(Pieces, SortedPieces) :-
-    sort(Pieces, SortedPieces).
+    sorted_pieces(Pieces, 1, SortedPieces).
+
+%!  sorted_pieces/3(+Pieces, +X, -SortedPieces)
+%
+%   Helper predicate for sorted_pieces/2.
+sorted_pieces(Pieces, X, [SortedPiece | SortedPieces]) :-
+
+    % X must be valid
+    between(1, 8, X),
+
+    % Select the piece with current X coordinate, if any
+    select(piece(Color, Type, X/Y), Pieces, _),
+
+    % Add the piece
+    SortedPiece = piece(Color, Type, X/Y),
+
+    % Recursive call
+    XNext is X + 1,
+    sorted_pieces(Pieces, XNext, SortedPieces), !.
+sorted_pieces(Pieces, X, SortedPieces) :- 
+
+    % X must be valid
+    between(1, 8, X),
+
+    % Recursive call
+    XNext is X + 1,
+    sorted_pieces(Pieces, XNext, SortedPieces), !.
+sorted_pieces(_, _, []) :- !.
 
 
 %! checkmate/2(+State, +Color)
@@ -124,7 +136,7 @@ check(State, Color) :-
     select(KingPiece, Pieces, _), !,
 
     % Check if any opponent piece can attack the king of the given color
-    not(is_safe(KingPiece, State)).
+    can_be_attacked(KingPiece, State).
 
 
 %! is_safe(+Piece, +State, +OpponentPieces)
@@ -155,3 +167,35 @@ is_safe_for_moves(Piece, [Move | Moves]) :-
     % Recursive call
     is_safe_for_moves(Piece, Moves), !.
 is_safe_for_moves(_, []) :- !.
+
+
+%! can_be_attacked/2(+Piece, +State)
+%
+%  If a given piece can be attacked in the given state.
+%  TODO: can be more efficient by only evaluating moves when necessary!!!!
+can_be_attacked(Piece, State) :-
+    color(Piece, Color),
+    
+    % Opponent Color
+    positions:opponent(Color, OpponentColor),
+
+    % All possible moves by the opponent
+    moves:all_possible_moves(OpponentColor, State, Moves),
+
+    % Helper predicate
+    can_be_attacked_for_moves(Piece, Moves).
+
+
+%! can_be_attacked_for_moves(+Piece, +Moves)
+%
+%  If a given piece can be attacked in a given list of moves.
+can_be_attacked_for_moves(Piece, [Move | _]) :- % Can be attacked
+    Move = move(DeletePieces, _, _, _),
+
+    % Piece is present inside the move
+    member(Piece, DeletePieces), !.
+
+can_be_attacked_for_moves(Piece, [_ | Moves]) :- % Cannot be attacked
+    
+    % Recursive call
+    can_be_attacked_for_moves(Piece, Moves), !.
