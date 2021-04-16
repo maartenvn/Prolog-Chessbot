@@ -1,7 +1,7 @@
 :- initialization main.
 :- use_module("io/parser").
 :- use_module("io/writer").
-:- use_module("positions").
+:- use_module("moves").
 
 main(Args):-
     handle_main(Args),
@@ -10,12 +10,12 @@ main(Args):-
 handle_main([TEST]) :- % Test Mode TODO: must be "TEST"
 
     % Load the data from the stdin stream and parse it.
-    phrase_from_stream(parser:parse_board(Board, Rokades, StartColor), current_input),
+    phrase_from_stream(parser:parse_state(State), current_input),
 
-    % Get all possible moves for the given board
-    positions:all_possible_moves(StartColor, Board, Rokades, Moves),
+    % Get all possible moves for the given state
+    moves:all_possible_moves(State, Moves),
 
     % Print all possible moves
-    writer:write_board_moves(StartColor, Board, Rokades, Moves).
+    writer:write_state_moves(State, Moves).
 
 handle_main([]).

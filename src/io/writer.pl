@@ -1,19 +1,27 @@
 :- module(writer, []).
 
 :- use_module("parser").
+:- use_module("../state").
 :- use_module("../positions").
+:- use_module("../moves").
+:- use_module("../pieces").
 
 
-%! write_board(+Board, +Rokades, +StartColor)
+%! write_state(+State)
 %
-%  Write a chess board to stdout.
-write_board(Board, Rokades, StartColor) :-
+%  Write a chess game state to stdout.
+write_state(State) :-
+    state:pieces(State, Pieces),
+    state:currentcolor(State, StartColor),
+    state:rokades(State, Rokades),
+    state:passant(State, Passant),
+
     % Convert board & rokades in a format that could be used by the parser
-    extract_rows(8, Board, Rows),
+    extract_rows(8, Pieces, PiecesList),
     extract_rokades(Rokades, RokadesList),
 
     % Parse the rows output
-    parser:parse_rows(8, Rows, RokadesList, StartColor, OutRows, []),
+    parser:parse_rows(8, PiecesList, RokadesList, Passant, StartColor, OutRows, []),
 
     % Parse the final row output
     parser:parse_final_row(OutFinalRow, []),
@@ -23,24 +31,20 @@ write_board(Board, Rokades, StartColor) :-
     write_codes(OutFinalRow).
 
 
-%! write_board_moves(+StartColor, +Board, +Rokades, +Moves)
+%! write_state_moves(+State, +Moves)
 %
-%  Write all possible chess boards for the given board to stdout.
-write_board_moves(StartColor, Board, Rokades, [Move | Moves]) :-
-
+%  Write all possible chess states for the given set of moves to stdout.
+write_state_moves(CurrentState, [Move | Moves]) :-
     % Do the move
-    positions:do_move(Move, Board, Rokades, NewBoard, NewRokades),
-
-    % Opponent is now at play
-    positions:opponent(StartColor, NextColor),
+    moves:do_move(Move, CurrentState, NextState),
 
     % Write the board to stdout
-    write_board(NewBoard, NewRokades, NextColor),
+    write_state(NextState),
     write("\n~\n"),
 
     % Recursive call
-    write_board_moves(StartColor, Board, Rokades, Moves).
-write_board_moves(_, _, _, []).
+    write_state_moves(CurrentState, Moves), !.
+write_state_moves(_, []) :- !.
 
 
 %! write_codes(+Codes)
@@ -51,20 +55,22 @@ write_codes(Codes) :-
     write(String).
 
 
-%! extract_rows(+Y, +Board, -Rows)
+%! extract_rows(+Y, +Pieces, -Rows)
 %
 %  List of pieces for a given board, with each list representing the pieces for that row.
-extract_rows(Y, Board, [Row | Rows]) :-
+extract_rows(Y, Pieces, [Row | Rows]) :-
+
+    % Y must be valid
     between(1, 8, Y), !,
 
     % Extract the row
-    positions:row_pieces(Y, Board, Row),
+    pieces:row_pieces(Y, Pieces, Row),
 
     % Next row
     YNext is Y - 1,
 
     % Recursive call
-    extract_rows(YNext, Board, Rows), !.
+    extract_rows(YNext, Pieces, Rows), !.
 extract_rows(_, _, []) :- !.
 
 
