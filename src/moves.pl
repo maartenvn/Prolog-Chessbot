@@ -266,7 +266,7 @@ pawn_promotion_moves(Piece, State, Moves) :-
         move([Piece], [piece(Color, bishop, NewPosition1)], [], none)
     ], !.
 
-pawn_promotion_moves(Piece, State, []) :-     
+pawn_promotion_moves(Piece, _, []) :-     
     pieces:type(Piece, pawn), !.  
 
 
