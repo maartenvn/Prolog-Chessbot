@@ -43,7 +43,7 @@ all_possible_states(_, [], []) :- !.                                            
 %
 % Update the state with a given move for a given piece.
 do_move(Move, CurrentState, NewState) :-
-    Move = move(DeletePieces, AppendPieces, DeleteRokade, NewPassant),
+    Move = move(DeletePieces, AppendPieces, DeleteRokades, NewPassant),
     state:pieces(CurrentState, CurrentPieces),
     state:rokades(CurrentState, CurrentRokades),
     state:nextcolor(CurrentState, NewColor),
@@ -54,9 +54,8 @@ do_move(Move, CurrentState, NewState) :-
     % Append pieces
     append(NewPiecesDeleted, AppendPieces, NewPieces),
 
-    % Delete Rokade
-    % If DeleteRokade is "none", this predicate will still succeed.
-    delete(CurrentRokades, DeleteRokade, NewRokades),
+    % Delete Rokades
+    util:delete_list(CurrentRokades, DeleteRokades, NewRokades),
 
     % Create the new state
     NewState = state(NewPieces, NewColor, NewRokades, NewPassant).
@@ -252,10 +251,10 @@ pawn_promotion_moves(Piece, Moves) :-
 
     % Possible moves
     Moves = [
-        move([Piece], [piece(Color, queen, X/Y)], none, none),
-        move([Piece], [piece(Color, horse, X/Y)], none, none),
-        move([Piece], [piece(Color, tower, X/Y)], none, none),
-        move([Piece], [piece(Color, bishop, X/Y)], none, none)
+        move([Piece], [piece(Color, queen, X/Y)], [], none),
+        move([Piece], [piece(Color, horse, X/Y)], [], none),
+        move([Piece], [piece(Color, tower, X/Y)], [], none),
+        move([Piece], [piece(Color, bishop, X/Y)], [], none)
     ], !.
 
 pawn_promotion_moves(Piece, []) :-     
@@ -312,7 +311,7 @@ pawn_passant_moves_part(Piece, State, XDifference, [Move]) :-
     OpponentPiece = piece(PassantColor, pawn, XPassant/Y),
 
     % Create the move
-    Move = move([Piece, OpponentPiece], [piece(PieceColor, pawn, XNew/YNew)], none, none), !.
+    Move = move([Piece, OpponentPiece], [piece(PieceColor, pawn, XNew/YNew)], [], none), !.
 
 pawn_passant_moves_part(Piece, _, _, []) :- 
     pieces:type(Piece, pawn), !.
@@ -457,11 +456,13 @@ create_piece_move(CurrentPiece, NewPosition, State, Passant, Move) :- % Opponent
     % Create the new piece
     NewPiece = piece(Color, Type, NewPosition),
 
-    % Rokade to delete (or none if no rokade should be deleted)
-    (positions:rokade_position(Position, Color, DeleteRokade) ; DeleteRokade = none),
+    % Rokades to delete
+    positions:rokades_position(Position, Color, DeleteRokadesFromMove),        % If king/tower move
+    positions:rokades_position(NewPosition, Color, DeleteRokadesFromCapture),  % If king/tower is captured
+    append([DeleteRokadesFromMove, DeleteRokadesFromCapture], DeleteRokades),
 
     % Unify the move
-    Move = move([CurrentPiece, OpponentPiece], [NewPiece], DeleteRokade, Passant), !.
+    Move = move([CurrentPiece, OpponentPiece], [NewPiece], DeleteRokades, Passant), !.
 
 create_piece_move(CurrentPiece, NewPosition, State, Passant, Move) :-  % No piece on new position
     pieces:color(CurrentPiece, Color),
@@ -474,10 +475,10 @@ create_piece_move(CurrentPiece, NewPosition, State, Passant, Move) :-  % No piec
     % Create the new piece
     NewPiece = piece(Color, Type, NewPosition),
 
-    % Rokade to delete (or none if no rokade should be deleted)
-    (positions:rokade_position(Position, Color, DeleteRokade) ; DeleteRokade = none),
+    % Rokades to delete
+    positions:rokades_position(Position, Color, DeleteRokades),
 
     % Unify the move
-    Move = move([CurrentPiece], [NewPiece], DeleteRokade, Passant), !.
+    Move = move([CurrentPiece], [NewPiece], DeleteRokades, Passant), !.
 
 

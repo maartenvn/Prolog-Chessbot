@@ -34,11 +34,16 @@ forward_position(X/Y, white, X/YNew) :- YNew is Y + 1.
 forward_position(X/Y, black, X/YNew) :- YNew is Y - 1.
 
 
-%! rokade_position(+X+/Y, +Color, +Rokade)
-rokade_position(1/1, white, rokade(white, long)).
-rokade_position(8/1, white, rokade(white, short)).
-rokade_position(1/8, black, rokade(black, long)).
-rokade_position(8/8, black, rokade(black, short)).
+%! rokades_position(+X+/Y, +Color, +Rokades)
+rokades_position(1/1, white, [rokade(white, long)]) :- !.                       % Tower
+rokades_position(8/1, white, [rokade(white, short)]) :- !.                      % Tower
+rokades_position(5/1, white, [rokade(white, long), rokade(white, short)]) :- !. % King
+
+rokades_position(1/8, black, [rokade(black, long)]) :- !.                       % Tower
+rokades_position(8/8, black, [rokade(black, short)]) :- !.                      % Tower
+rokades_position(5/8, black, [rokade(black, long), rokade(black, short)]) :- !. % King
+
+rokades_position(_, _, []) :- !.                                                % Base-case
 
 
 %! horse_position(+Piece, +State, -Position)

@@ -5,11 +5,12 @@
 :- use_module("alphabeta").
 :- use_module("state").
 
+
 main(Args):-
     handle_main(Args),
     halt(0).
 
-handle_main([TEST]) :- % Test Mode TODO: must be "TEST"
+handle_main([_]) :- % Test Mode TODO: this must parse "TEST"
 
     % Load the data from the stdin stream and parse it.
     phrase_from_stream(parser:parse_state(State), current_input),
@@ -29,7 +30,7 @@ handle_main([]) :- % Move Mode
     state:currentcolor(State, Player),
 
     % Determin the next best move
-    alphabeta:alphabeta(Player, State, 4, -100000, 100000, BestState, BestScore),
+    alphabeta:alphabeta(Player, State, 5, -100000, 100000, BestState, BestScore),
 
     %write(BestScore),
 
