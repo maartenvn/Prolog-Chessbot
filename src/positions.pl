@@ -36,8 +36,8 @@ forward_position(X/Y, black, X/YNew) :- YNew is Y - 1.
 
 %! rokade_position(+X+/Y, +Color, +Rokade)
 rokade_position(1/1, white, rokade(white, long)).
-rokade_position(1/8, white, rokade(white, short)).
-rokade_position(8/1, black, rokade(black, long)).
+rokade_position(8/1, white, rokade(white, short)).
+rokade_position(1/8, black, rokade(black, long)).
 rokade_position(8/8, black, rokade(black, short)).
 
 

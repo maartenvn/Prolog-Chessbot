@@ -14,11 +14,11 @@ handle_main([TEST]) :- % Test Mode TODO: must be "TEST"
     % Load the data from the stdin stream and parse it.
     phrase_from_stream(parser:parse_state(State), current_input),
 
-    % Get all possible moves for the given state
-    moves:all_possible_moves(State, Moves),
+    % Get all possible states for the current state
+    moves:all_possible_states(State, NextStates),
 
-    % Print all possible moves
-    writer:write_state_moves(State, Moves).
+    % Print all possible states
+    writer:write_states(NextStates).
 
 handle_main([]) :- % Move Mode
 

@@ -5,13 +5,38 @@
 :- use_module("pieces").
 :- use_module("util").
 
-%! all_possible_states(+CurrentState, +Moves, +NextStates)
+%! all_possible_states/2(+CurrentState, -NextStates)
+%
+%  Generate all possible next states for a given state
+all_possible_states(CurrentState, NextStates) :-
+    state:currentcolor(CurrentState, CurrentColor),
+
+    % All pseudo-possible moves for the next player
+    moves:all_possible_moves(CurrentColor, CurrentState, NextMoves),
+
+    % Helper predicate
+    all_possible_states(CurrentState, NextMoves, NextStates).
+
+
+%! all_possible_states/3(+CurrentState, +Moves, -NextStates)
 %
 %  Generate a new state for every possible move and append it to a list.
-all_possible_states(CurrentState, [Move | Moves], [NextState | NextStates]) :-
+all_possible_states(CurrentState, [Move | Moves], [NextState | NextStates]) :- % Valid pseudo-move
+    state:currentcolor(CurrentState, CurrentColor),
+
+    % Do the move and retrieve the new state
     do_move(Move, CurrentState, NextState),
+
+    % State must not be in-check
+    % If this state causes a check, it is not a valid state
+    not(state:check(NextState, CurrentColor)),
+    
+    % Recursive call
     all_possible_states(CurrentState, Moves, NextStates), !.
-all_possible_states(_, [], []) :- !.
+all_possible_states(CurrentState, [_ | Moves], NextStates) :-                   % Invalid pseudo-move
+    % Recursive call
+    all_possible_states(CurrentState, Moves, NextStates), !.
+all_possible_states(_, [], []) :- !.                                            % Base-Case
 
 
 %! do_move(+Move, +CurrentState, -NewState)
@@ -39,7 +64,7 @@ do_move(Move, CurrentState, NewState) :-
 
 %! all_possible_moves/2(+State, -Moves)
 %
-%  All possible moves for the current state.
+%  All pseudo-possible moves for the current state.
 all_possible_moves(State, Moves) :-
     state:currentcolor(State, CurrentColor),
     all_possible_moves(CurrentColor, State, Moves).
@@ -47,7 +72,7 @@ all_possible_moves(State, Moves) :-
 
 %! all_possible_moves/3(+Color, +State, -Moves)
 %
-%  All possible moves for the current state for a given color.
+%  All pseudo-possible moves for the current state for a given color.
 all_possible_moves(Color, State, Moves) :-
     
     % Get the pieces for the given color
@@ -60,7 +85,7 @@ all_possible_moves(Color, State, Moves) :-
 
 %! all_possible_moves_for_pieces(+Pieces, +State, -Moves)
 %
-%  All possible moves for all given pieces in the current state.
+%  All pseudo-possible moves for all given pieces in the current state.
 all_possible_moves_for_pieces([Piece | Pieces], State, Moves) :-
 
     % All possible moves for the current piece
@@ -76,7 +101,8 @@ all_possible_moves_for_pieces([], _, []) :- !.
 
 %! possible_moves(+Piece, +State, -Moves)
 %
-%  All possible moves for a specific piece in the given state.
+%  All psuedo-possible moves for a specific piece in the given state.
+%  This predicate will also include moves that cause a potential in-check situation.
 
 % King
 possible_moves(Piece, State, Moves) :-
@@ -347,15 +373,10 @@ path_moves(Piece, State, XDirection, YDirection, Moves) :-
 %
 %  TODO: ask prof about code duplication
 path_moves(StartPiece, X/Y, State, XDirection, YDirection, [Move | Moves]) :-
-    pieces:color(StartPiece, Color),
-    pieces:type(StartPiece, Type),
     
     % Unify the new position
     XNew is X + XDirection,
     YNew is Y + YDirection,
-
-    % Unify the new piece
-    NewPiece = piece(Color, Type, XNew/YNew),
 
     % Create the move
     create_piece_move(StartPiece, XNew/YNew, State, Move),
@@ -385,7 +406,7 @@ path_moves(StartPiece, X/Y, State, XDirection, YDirection, [Move]) :-
     % New position must be taken by the opponent
     positions:opponent_position(XNew/YNew, Color, State), !.
 
-path_moves(_, _, _, _, []) :- !.
+path_moves(_, _, _, _, _, []) :- !.
 
 %! positions_to_moves(+Piece, +Stat, +Positions, -Moves)
 %
