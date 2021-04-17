@@ -34,6 +34,10 @@ write_state(State) :-
 %! write_states(+States)
 %
 %  Write a given list of states to stdout.
+write_states([State]) :-
+    
+    % Write the board to stdout
+    write_state(State), !.
 write_states([State | States]) :-
 
     % Write the board to stdout

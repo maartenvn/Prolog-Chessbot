@@ -152,7 +152,7 @@ possible_moves(Piece, State, Moves) :-
     % Possible moves
     pawn_forward_moves(Piece, State, ForwardMoves),
     pawn_diagonal_moves(Piece, State, DiagonalMoves),
-    pawn_promotion_moves(Piece, PromitionMoves),
+    pawn_promotion_moves(Piece, State, PromitionMoves),
     pawn_passant_moves(Piece, State, PassantMoves),
 
     % Merge possible moves
@@ -163,6 +163,7 @@ possible_moves(Piece, State, Moves) :-
 %  Moves for the pawn going forward
 pawn_forward_moves(Piece, State, [Move1, Move2]) :- % Pawn on start position (can move 2 steps forward)
     pieces:type(Piece, pawn),
+    pieces:color(Piece, Color),
     pieces:position(Piece, CurrentPosition),
 
     % Pawn must be on start position
@@ -182,15 +183,18 @@ pawn_forward_moves(Piece, State, [Move1, Move2]) :- % Pawn on start position (ca
     create_move(CurrentPosition, NewPosition1, State, Move1), % En-passant possibility
     create_move(CurrentPosition, NewPosition2, State, passant(Color, NewPosition1), Move2), !.
 
-pawn_forward_moves(Piece, State, [Move1]) :-      % Pawn (can move max 1 step forward)
+pawn_forward_moves(Piece, State, [Move1]) :-       % Pawn (can move max 1 step forward)
     pieces:type(Piece, pawn),
     pieces:position(Piece, CurrentPosition),
-    pieces:position(Piece, Color),
+    pieces:color(Piece, Color),
 
-    % First position must be valid & empty
+    % Forward position must be valid & empty
     positions:forward_position(CurrentPosition, Color, NewPosition1),
     positions:valid_position(NewPosition1),
     positions:empty_position(NewPosition1, State),
+
+    % New position must not be on the promition position
+    not(positions:pawn_promotion_position(NewPosition1, Color)),
 
     % Create the moves
     create_move(CurrentPosition, NewPosition1, State, Move1), !.
@@ -238,26 +242,31 @@ pawn_diagonal_moves_part(Piece, State, XDifference, [Move]) :- % Left diagonal
 pawn_diagonal_moves_part(Piece, _, _, []) :-
     pieces:type(Piece, pawn), !.
 
-%! pawn_promotion_moves(+Piece, -Moves)
+%! pawn_promotion_moves(+Piece, +State, -Moves)
 %
 %  Move for the given pawn if reaching a point of promotion
-pawn_promotion_moves(Piece, Moves) :-
+pawn_promotion_moves(Piece, State, Moves) :-
     pieces:type(Piece, pawn),
-    pieces:position(Piece, X/Y),
+    pieces:position(Piece, CurrentPosition),
     pieces:color(Piece, Color),
 
-    % Pawn must be on promotion position
-    positions:pawn_promotion_position(X/Y, Color),
+    % Forward position must be valid & empty
+    positions:forward_position(CurrentPosition, Color, NewPosition1),
+    positions:valid_position(NewPosition1),
+    positions:empty_position(NewPosition1, State),
+
+    % New position must be on promotion position
+    positions:pawn_promotion_position(NewPosition1, Color),
 
     % Possible moves
     Moves = [
-        move([Piece], [piece(Color, queen, X/Y)], [], none),
-        move([Piece], [piece(Color, horse, X/Y)], [], none),
-        move([Piece], [piece(Color, tower, X/Y)], [], none),
-        move([Piece], [piece(Color, bishop, X/Y)], [], none)
+        move([Piece], [piece(Color, queen, NewPosition1)], [], none),
+        move([Piece], [piece(Color, horse, NewPosition1)], [], none),
+        move([Piece], [piece(Color, tower, NewPosition1)], [], none),
+        move([Piece], [piece(Color, bishop, NewPosition1)], [], none)
     ], !.
 
-pawn_promotion_moves(Piece, []) :-     
+pawn_promotion_moves(Piece, State, []) :-     
     pieces:type(Piece, pawn), !.  
 
 

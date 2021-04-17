@@ -1,12 +1,12 @@
-:- initialization main.
+:- initialization(main, main).
+
 :- use_module("io/parser").
 :- use_module("io/writer").
 :- use_module("moves").
 :- use_module("alphabeta").
 :- use_module("state").
 
-
-main(Args):-
+main(Args) :-
     handle_main(Args),
     halt(0).
 
@@ -30,7 +30,7 @@ handle_main([]) :- % Move Mode
     state:currentcolor(State, Player),
 
     % Determin the next best move
-    alphabeta:alphabeta(Player, State, 5, -100000, 100000, BestState, BestScore),
+    alphabeta:alphabeta(Player, State, 4, -100000, 100000, BestState, _),
 
     %write(BestScore),
 
