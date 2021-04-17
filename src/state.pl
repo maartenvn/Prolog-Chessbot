@@ -103,7 +103,7 @@ can_be_attacked_for_moves(Piece, [Move | _]) :-  % Can be attacked
     Move = move(DeletePieces, _, _, _),
 
     % Piece is present inside the move
-    member(Piece, DeletePieces), !.
+    memberchk(Piece, DeletePieces), !.
 
 can_be_attacked_for_moves(Piece, [_ | Moves]) :- % Cannot be attacked
     
