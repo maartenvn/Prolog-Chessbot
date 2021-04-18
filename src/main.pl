@@ -32,9 +32,7 @@ handle_main([]) :- % Move Mode
     state:currentcolor(State, Player),
 
     % Determin the next best move
-    alphabeta:alphabeta(Player, State, 5, -100000, 100000, BestState, _),
-
-    %write(BestScore),
+    alphabeta:alphabeta(Player, State, 2, -100000, 100000, BestState, _),
 
     % Print the best state
     writer:write_state(BestState).

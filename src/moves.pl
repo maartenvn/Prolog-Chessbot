@@ -21,7 +21,7 @@ all_possible_states(CurrentState, NextStates) :-
 %! all_possible_states/3(+CurrentState, +Moves, -NextStates)
 %
 %  Generate a new state for every possible move and append it to a list.
-all_possible_states(CurrentState, [Move | Moves], [NextState | NextStates]) :- % Valid pseudo-move
+all_possible_states(CurrentState, [Move | Moves], [NextState | NextStates]) :-  % Valid pseudo-move
     state:currentcolor(CurrentState, CurrentColor),
 
     % Do the move and retrieve the new state

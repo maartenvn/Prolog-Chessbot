@@ -8,7 +8,7 @@
 
 
 test :-
-    phrase_from_file(parse_state(State), "boards/start.txt", [encoding(utf8),type(text)]),
+    phrase_from_file(parse_state(State), "boards/checkmate.txt", [encoding(utf8),type(text)]),
     write(State).
 
 

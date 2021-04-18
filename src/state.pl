@@ -18,7 +18,7 @@ currentcolor(state(_, CurrentColor, _, _), CurrentColor).
 
 %! nextcolor(+State, -NextColor)
 %
-%  Extract the next color (the player that can do the next move) from the given state.
+%  Extract the next color (the player that can do a move after the current player did a move) from the given state.
 nextcolor(state(_, white, _, _), black).
 nextcolor(state(_, black, _, _), white).
 
