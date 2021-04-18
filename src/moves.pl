@@ -152,11 +152,53 @@ possible_moves(Piece, State, Moves) :-
     % Possible moves
     pawn_forward_moves(Piece, State, ForwardMoves),
     pawn_diagonal_moves(Piece, State, DiagonalMoves),
-    pawn_promotion_moves(Piece, State, PromitionMoves),
     pawn_passant_moves(Piece, State, PassantMoves),
 
     % Merge possible moves
-    append([ForwardMoves, DiagonalMoves, PromitionMoves, PassantMoves], Moves), !.
+    append([ForwardMoves, DiagonalMoves, PassantMoves], MergedMoves),
+    
+    % Handle potential pawn promotional moves
+    convert_promotion_moves(Piece, MergedMoves, Moves), !.
+
+%! convert_promotion_moves(+Piece, +Moves, +PromotionMoves)
+%
+%  Convert a list of moves to a list of promotion moves.
+%  Will scan every move, check if the piece can be promoted, and create the correct promotions
+convert_promotion_moves(Piece, [Move | Moves], PromotionMoves) :-    % Current move is promotion move
+    pieces:color(Piece, Color),
+    Move = move(DeletePieces, AppendPieces, _, _),
+
+    % Select the pawn
+    select(piece(Color, pawn, NewPosition), AppendPieces, _),
+
+    % Check if the pawn position is a promotion position
+    positions:pawn_promotion_position(NewPosition, Color),
+
+    % Recursive call
+    convert_promotion_moves(Piece, Moves, PromotionMovesRest),
+
+    % Create the promotion moves
+    PromotionMovesCurrent = [
+        move(DeletePieces, [piece(Color, queen, NewPosition)], [], none),
+        move(DeletePieces, [piece(Color, horse, NewPosition)], [], none),
+        move(DeletePieces, [piece(Color, tower, NewPosition)], [], none),
+        move(DeletePieces, [piece(Color, bishop, NewPosition)], [], none)
+    ],
+
+    % Merge
+    append([PromotionMovesCurrent, PromotionMovesRest], PromotionMoves), !.
+
+convert_promotion_moves(Piece, [Move | Moves], [PromotionMove | PromotionMoves]) :-    % Current move is not a promotion move
+
+    % Add the old move to the promotion moves
+    % since the original moves, that are no promotions, must be included as well
+    PromotionMove = Move,
+    
+    % Recursive call
+    convert_promotion_moves(Piece, Moves, PromotionMoves), !.
+
+convert_promotion_moves(_, [], []) :- !. % Base Case
+
 
 %! pawn_moves(+Piece, +State, -Moves)
 % 
@@ -192,9 +234,6 @@ pawn_forward_moves(Piece, State, [Move1]) :-       % Pawn (can move max 1 step f
     positions:forward_position(CurrentPosition, Color, NewPosition1),
     positions:valid_position(NewPosition1),
     positions:empty_position(NewPosition1, State),
-
-    % New position must not be on the promition position
-    not(positions:pawn_promotion_position(NewPosition1, Color)),
 
     % Create the moves
     create_move(CurrentPosition, NewPosition1, State, Move1), !.
@@ -240,33 +279,6 @@ pawn_diagonal_moves_part(Piece, State, XDifference, [Move]) :- % Left diagonal
     create_move(X/Y, XNew/YNew, State, Move), !.
 
 pawn_diagonal_moves_part(Piece, _, _, []) :-
-    pieces:type(Piece, pawn), !.
-
-%! pawn_promotion_moves(+Piece, +State, -Moves)
-%
-%  Move for the given pawn if reaching a point of promotion
-pawn_promotion_moves(Piece, State, Moves) :-
-    pieces:type(Piece, pawn),
-    pieces:position(Piece, CurrentPosition),
-    pieces:color(Piece, Color),
-
-    % Forward position must be valid & empty
-    positions:forward_position(CurrentPosition, Color, NewPosition1),
-    positions:valid_position(NewPosition1),
-    positions:empty_position(NewPosition1, State),
-
-    % New position must be on promotion position
-    positions:pawn_promotion_position(NewPosition1, Color),
-
-    % Possible moves
-    Moves = [
-        move([Piece], [piece(Color, queen, NewPosition1)], [], none),
-        move([Piece], [piece(Color, horse, NewPosition1)], [], none),
-        move([Piece], [piece(Color, tower, NewPosition1)], [], none),
-        move([Piece], [piece(Color, bishop, NewPosition1)], [], none)
-    ], !.
-
-pawn_promotion_moves(Piece, _, []) :-     
     pieces:type(Piece, pawn), !.  
 
 
