@@ -471,6 +471,9 @@ create_piece_move(CurrentPiece, NewPosition, State, Passant, Move) :- % Opponent
     pieces:type(CurrentPiece, Type),
     pieces:position(CurrentPiece, Position),
 
+    % Opponent color
+    positions:opponent(Color, OpponentColor),
+
     % Opponent at the new position
     positions:opponent_position(NewPosition, Color, State, OpponentPiece),
 
@@ -479,7 +482,7 @@ create_piece_move(CurrentPiece, NewPosition, State, Passant, Move) :- % Opponent
 
     % Rokades to delete
     positions:rokades_position(Position, Color, DeleteRokadesFromMove),        % If king/tower move
-    positions:rokades_position(NewPosition, Color, DeleteRokadesFromCapture),  % If king/tower is captured
+    positions:rokades_position(NewPosition, OpponentColor, DeleteRokadesFromCapture),  % If king/tower is captured
     append([DeleteRokadesFromMove, DeleteRokadesFromCapture], DeleteRokades),
 
     % Unify the move
