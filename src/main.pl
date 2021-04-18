@@ -6,7 +6,9 @@
 :- use_module("alphabeta").
 :- use_module("state").
 
-main(Args) :-
+
+main :-
+    current_prolog_flag(argv, Args),
     handle_main(Args),
     halt(0).
 
@@ -30,7 +32,7 @@ handle_main([]) :- % Move Mode
     state:currentcolor(State, Player),
 
     % Determin the next best move
-    alphabeta:alphabeta(Player, State, 3, -100000, 100000, BestState, _),
+    alphabeta:alphabeta(Player, State, 5, -100000, 100000, BestState, _),
 
     %write(BestScore),
 
