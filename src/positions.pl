@@ -168,8 +168,8 @@ empty_position(X/Y, State) :-
 %! empty_or_opponent_position(+X/+Y, +Color, +State)
 %
 %  Check if a position is empty or taken by a piece of the opponent player.
-empty_or_opponent_position(X/Y, Color, State) :- opponent_position(X/Y, Color, State), !.
 empty_or_opponent_position(X/Y, _, State) :- empty_position(X/Y, State), !.
+empty_or_opponent_position(X/Y, Color, State) :- opponent_position(X/Y, Color, State), !.
 
 
 %! opponent(+Color, -OpponentColor)
