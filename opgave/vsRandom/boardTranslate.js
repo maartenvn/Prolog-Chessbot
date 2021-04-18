@@ -45,16 +45,16 @@ function encode(fen) {
   let outBoard = boardLines.map((line, i) => `${8 - i} ${line}`);
   outBoard[LINE1] += [
     " [",
-    rok.includes(revSymbols["♕"]) ? "♕" : "",
-    rok.includes(revSymbols["♔"]) ? "♔" : "",
+    rok.includes(revSymbols["♕"]) ? "♕" : " ",
+    rok.includes(revSymbols["♔"]) ? "♔" : " ",
     enpassant.endsWith("3") ? enpassant : "",
     "]",
     player == "w" ? "☚" : "",
   ].join("");
   outBoard[LINE8] += [
     " [",
-    rok.includes(revSymbols["♛"]) ? "♛" : "",
-    rok.includes(revSymbols["♚"]) ? "♚" : "",
+    rok.includes(revSymbols["♛"]) ? "♛" : " ",
+    rok.includes(revSymbols["♚"]) ? "♚" : " ",
     enpassant.endsWith("6") ? enpassant : "",
     "]",
     player == "b" ? "☚" : "",

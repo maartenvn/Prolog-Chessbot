@@ -34,6 +34,18 @@ forward_position(X/Y, white, X/YNew) :- YNew is Y + 1.
 forward_position(X/Y, black, X/YNew) :- YNew is Y - 1.
 
 
+%! rokades_position(+X+/Y, +Color, +Rokades)
+rokades_position(1/1, white, [rokade(white, long)]) :- !.                       % Tower
+rokades_position(8/1, white, [rokade(white, short)]) :- !.                      % Tower
+rokades_position(5/1, white, [rokade(white, long), rokade(white, short)]) :- !. % King
+
+rokades_position(1/8, black, [rokade(black, long)]) :- !.                       % Tower
+rokades_position(8/8, black, [rokade(black, short)]) :- !.                      % Tower
+rokades_position(5/8, black, [rokade(black, long), rokade(black, short)]) :- !. % King
+
+rokades_position(_, _, []) :- !.                                                % Base-case
+
+
 %! horse_position(+Piece, +State, -Position)
 %
 %  Move that could be done by the horse from a given piece
@@ -73,7 +85,7 @@ horse_position(piece(Color, _, X/Y), State, XPos/YPos) :-
     ],
 
     % Difference must be a member of the possible differences
-    member((XDiff, YDiff), PossibleDifferences).
+    memberchk((XDiff, YDiff), PossibleDifferences).
 
 
 %! square_position(+Piece, +State, -XPos/-YPos)
@@ -140,7 +152,7 @@ opponent_position(X/Y, Color, State, OpponentPiece) :-
     OpponentPiece = piece(OpponentColor, _, X/Y),
 
     % Piece must be of the opponent's color
-    member(OpponentPiece, Pieces).
+    memberchk(OpponentPiece, Pieces).
 
 
 %! empty_position(+X/+Y, +Color, +State)
@@ -150,7 +162,7 @@ empty_position(X/Y, State) :-
     state:pieces(State, Pieces),
 
     % Location must be empty
-    not(member(piece(_, _, X/Y), Pieces)).
+    not(memberchk(piece(_, _, X/Y), Pieces)).
 
 
 %! empty_or_opponent_position(+X/+Y, +Color, +State)

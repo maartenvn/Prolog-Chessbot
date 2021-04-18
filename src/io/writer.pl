@@ -31,20 +31,22 @@ write_state(State) :-
     write_codes(OutFinalRow).
 
 
-%! write_state_moves(+State, +Moves)
+%! write_states(+States)
 %
-%  Write all possible chess states for the given set of moves to stdout.
-write_state_moves(CurrentState, [Move | Moves]) :-
-    % Do the move
-    moves:do_move(Move, CurrentState, NextState),
+%  Write a given list of states to stdout.
+write_states([State]) :-
+    
+    % Write the board to stdout
+    write_state(State), !.
+write_states([State | States]) :-
 
     % Write the board to stdout
-    write_state(NextState),
+    write_state(State),
     write("\n~\n"),
 
     % Recursive call
-    write_state_moves(CurrentState, Moves), !.
-write_state_moves(_, []) :- !.
+    write_states(States), !.
+write_states([]) :- !.
 
 
 %! write_codes(+Codes)
@@ -64,7 +66,10 @@ extract_rows(Y, Pieces, [Row | Rows]) :-
     between(1, 8, Y), !,
 
     % Extract the row
-    pieces:row_pieces(Y, Pieces, Row),
+    pieces:row_pieces(Y, Pieces, UnsortedRow),
+
+    % Sort the row
+    pieces:sorted_pieces(UnsortedRow, Row),
 
     % Next row
     YNext is Y - 1,

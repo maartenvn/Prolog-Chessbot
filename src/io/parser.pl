@@ -8,7 +8,7 @@
 
 
 test :-
-    phrase_from_file(parse_state(State), "boards/start.txt", [encoding(utf8),type(text)]),
+    phrase_from_file(parse_state(State), "boards/checkmate.txt", [encoding(utf8),type(text)]),
     write(State).
 
 
@@ -169,7 +169,8 @@ parse_current_player(_, _)     --> "", !.
 parse_final_row --> 
     parse_space,
     parse_space,
-    "abcdefgh". 
+    "abcdefgh",
+    parse_newline_or_nothing.
     
 
 %! parse_row_number(+RowNumber)
@@ -207,6 +208,13 @@ parse_space --> " ".
 %
 % Parse a single newline.
 parse_newline --> "\n".
+
+
+%! parse_newline_or_nothing()
+%
+% Parse a single newline or nothing
+parse_newline_or_nothing --> parse_newline, !.
+parse_newline_or_nothing --> "", !.
 
 
 %! parse_pieces(-Pieces)
