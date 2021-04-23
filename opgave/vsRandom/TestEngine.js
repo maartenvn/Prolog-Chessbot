@@ -77,7 +77,7 @@ function run(fen, fens) {
     let result = "";
     let err = "";
     let startTime = new Date(); // reset when all input is given
-    engine = spawn(swipl, ["-f", "-q", "-t", "halt(1)", "-O", project], {
+    let engine = spawn(swipl, ["-f", "-q", "-t", "halt(1)", "-O", project], {
       stdio: ["pipe", "pipe", "pipe"],
     });
 
