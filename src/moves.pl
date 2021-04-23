@@ -166,6 +166,7 @@ possible_moves(Piece, State, Moves) :-
 %  Will scan every move, check if the piece can be promoted, and create the correct promotions
 convert_promotion_moves(Piece, [Move | Moves], PromotionMoves) :-    % Current move is promotion move
     pieces:color(Piece, Color),
+    positions:opponent(Color, OpponentColor),
     Move = move(DeletePieces, AppendPieces, _, _),
 
     % Select the pawn
@@ -177,12 +178,16 @@ convert_promotion_moves(Piece, [Move | Moves], PromotionMoves) :-    % Current m
     % Recursive call
     convert_promotion_moves(Piece, Moves, PromotionMovesRest),
 
+    % Rokades to delete
+    positions:rokades_position(NewPosition, OpponentColor, DeleteRokades),  % If king/tower is captured
+
     % Create the promotion moves
+    % TODO: move to create_position
     PromotionMovesCurrent = [
-        move(DeletePieces, [piece(Color, queen, NewPosition)], [], none),
-        move(DeletePieces, [piece(Color, horse, NewPosition)], [], none),
-        move(DeletePieces, [piece(Color, tower, NewPosition)], [], none),
-        move(DeletePieces, [piece(Color, bishop, NewPosition)], [], none)
+        move(DeletePieces, [piece(Color, queen, NewPosition)], DeleteRokades, none),
+        move(DeletePieces, [piece(Color, horse, NewPosition)], DeleteRokades, none),
+        move(DeletePieces, [piece(Color, tower, NewPosition)], DeleteRokades, none),
+        move(DeletePieces, [piece(Color, bishop, NewPosition)], DeleteRokades, none)
     ],
 
     % Merge
@@ -466,7 +471,7 @@ create_piece_move(CurrentPiece, NewPosition, State, Move) :-
 %! create_move/6(+CurrentPiece, +NewPosition, +State, +Passant, -Move)
 %
 %  Create a move for a given piece, position and en-passant possability
-create_piece_move(CurrentPiece, NewPosition, State, Passant, Move) :- % Opponent on new position
+create_piece_move(CurrentPiece, NewPosition, State, Passant, Move) :-  % Opponent on new position
     pieces:color(CurrentPiece, Color),
     pieces:type(CurrentPiece, Type),
     pieces:position(CurrentPiece, Position),
@@ -481,7 +486,7 @@ create_piece_move(CurrentPiece, NewPosition, State, Passant, Move) :- % Opponent
     NewPiece = piece(Color, Type, NewPosition),
 
     % Rokades to delete
-    positions:rokades_position(Position, Color, DeleteRokadesFromMove),        % If king/tower move
+    positions:rokades_position(Position, Color, DeleteRokadesFromMove),                % If king/tower move
     positions:rokades_position(NewPosition, OpponentColor, DeleteRokadesFromCapture),  % If king/tower is captured
     append([DeleteRokadesFromMove, DeleteRokadesFromCapture], DeleteRokades),
 
