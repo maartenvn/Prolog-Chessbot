@@ -108,6 +108,46 @@ pieces(State, X/Y, Pieces) :-           % Piece at current position is "none"
 pieces(_, _, []) :- !.                  % Base case
 
 
+%! color_pieces/3(+State, +Color, -ColorPieces)
+%
+%  Unify all pieces for a given Color from the given state.
+color_pieces(State, Color, ColorPieces) :-
+    color_pieces(State, Color, 1/1, ColorPieces).
+
+
+%! color_pieces/4(+State, +Color, +X/+Y, -ColorPieces)
+%
+%  Helper predicate for color_pieces/3
+color_pieces(State, Color, X/Y, [ColorPiece | ColorPieces]) :- % Piece at current position is of the given color
+    
+    % Position must be valid
+    positions:valid_position(X/Y),
+    
+    % Piece at the current position
+    piece_at_position(State, X/Y, ColorPiece),
+
+    % Color must match
+    pieces:color(ColorPiece, Color),
+
+    % Next position
+    positions:next_position(X/Y, XNew/YNew), !,
+
+    % Recursive call
+    color_pieces(State, Color, XNew/YNew, ColorPieces), !.
+
+color_pieces(State, Color, X/Y, ColorPieces) :-               % Piece at current position is "none" or not of the given color
+    % Position must be valid
+    positions:valid_position(X/Y),
+
+    % Next position
+    positions:next_position(X/Y, XNew/YNew), !,
+
+    % Recursive call
+    color_pieces(State, Color, XNew/YNew, ColorPieces), !.
+
+color_pieces(_, _, _, []) :- !.                               % Base case
+
+
 %! piece_at_position(+State, +X/+Y, -Piece).
 %
 %  Piece at a given position in a given state.
@@ -235,23 +275,6 @@ set_color(State, Color, NewState) :-
 
     % Create the new state
     NewState = state(Board, Color, Rokades, Passant).
-
-
-%! color_pieces(+Color, +State, -ColorPieces)
-%
-%  Unify all pieces for a given Color from the given state.
-color_pieces(Color, State, ColorPieces) :-
-    state:pieces(State, Pieces),
-
-    % Extract the pieces that match the given color.
-    include(piece_color(Color), Pieces, ColorPieces).
-
-
-%! piece_color(-Color, +Piece)
-%
-%  Extract the color of a piece
-%  This can be used as a predicate in predicates like "include"
-piece_color(Color, piece(Color, _, _)).
 
 
 %! check(+State, +Color)

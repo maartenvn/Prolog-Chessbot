@@ -180,14 +180,14 @@ next_position(X/Y, XNew/YNew) :-    % X is end of the row
     X = 8,
 
     % Increment Y and reset X
-    XNew is 1,
+    XNew = 1,
     YNew is Y + 1, !.
 
 next_position(X/Y, XNew/YNew) :-    % X is end of the row
 
     % Increment X
     XNew is X + 1,
-    YNew is Y, !.
+    YNew = Y, !.
 
 
 %! opponent(+Color, -OpponentColor)

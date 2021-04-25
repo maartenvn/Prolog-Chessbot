@@ -210,7 +210,7 @@ score(Player, State, Score) :-
 %  Score for a given state for a given player.
 score_player(Player, State, Score) :-
     % Get the pieces for the given player
-    state:color_pieces(Player, State, ColorPieces),
+    state:color_pieces(State, Player, ColorPieces),
 
     % Evaluate every piece and add it's score to the scores
     score_pieces(ColorPieces, PiecesScore),

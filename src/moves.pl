@@ -78,7 +78,7 @@ all_possible_moves(State, Moves) :-
 all_possible_moves(Color, State, Moves) :-
     
     % Get the pieces for the given color
-    state:color_pieces(Color, State, ColorPieces),
+    state:color_pieces(State, Color, ColorPieces),
 
     % Get all possible moves for the pieces
     % TODO: merge this statement inside this predicate using maplist & append.
