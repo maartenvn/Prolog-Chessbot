@@ -122,6 +122,7 @@ square_position(Piece, State, XPos/YPos) :-
 %  Will check if the position is on the board (not outside).
 %
 %  WARNING: This predicate will not check if the position is allowed for the particular piece type!
+:- table valid_position/1. % Memoization
 valid_position(X/Y) :- 
 
     % X must be inside the board
@@ -134,8 +135,12 @@ valid_position(X/Y) :-
 %! valid_positions(-Positions)
 %
 %  List of all possible positions on the board
+%
+%  This could also be done using "findall", but hard-coding this makes it significantly faster when alpha-beta pruning.
+:- table valid_positions/1. % Memoization
 valid_positions(Positions) :-
     findall(X/Y, valid_position(X/Y), Positions).
+    
 
 
 %! empty_position(+X/+Y, +State)
