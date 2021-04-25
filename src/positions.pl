@@ -156,11 +156,14 @@ opponent_position(X/Y, Color, State, OpponentPiece) :-
     % Opponent color
     opponent(Color, OpponentColor),
 
-    % Piece at the given location must be of the opponent color
-    OpponentPiece = piece(OpponentColor, _, X/Y),
-
     % Piece at the given position must be as described above
-    state:piece_at_position(State, X/Y, OpponentPiece).
+    state:piece_at_position(State, X/Y, piece(PieceColor, PieceType, _)),
+
+    % Piece color must match opponent color
+    PieceColor = OpponentColor,
+
+    % Opponent Piece
+    OpponentPiece = piece(OpponentColor, PieceType, X/Y).
 
 
 %! empty_or_opponent_position(+X/+Y, +Color, +State)
