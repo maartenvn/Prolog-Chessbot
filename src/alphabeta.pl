@@ -166,7 +166,7 @@ best_of(Player, _, State2, Score1, Score2, BestState, BestScore) :- % Minimizing
 %  Since the state contains the player that can do the next move, the currentcolor must be different from the player.
 max(State, Player) :-
     state:currentcolor(State, CurrentPlayer),
-    CurrentPlayer \= Player.
+    CurrentPlayer \== Player.
 
 
 %! min(+State, +Player)
@@ -175,7 +175,7 @@ max(State, Player) :-
 %  Since the state contains the player that can do the next move, the currentcolor must be the same as the player.
 min(State, Player) :-
     state:currentcolor(State, CurrentPlayer),
-    CurrentPlayer = Player.
+    CurrentPlayer == Player.
 
 
 %! score(+Player, +State, -Score)

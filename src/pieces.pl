@@ -26,10 +26,10 @@ color(piece(Color, _, _), Color).
 %
 %  List of pieces for a given row.
 row_pieces(Y, [Piece | Pieces], [RowPiece | RowPieces]) :- % Match
-    Piece = piece(_, _, _/PieceY),
+    Piece = piece:position(Piece, _/PieceY),
 
     % Row numbers must match
-    PieceY = Y,
+    PieceY == Y,
 
     % Append to the list
     RowPiece = Piece, !,
@@ -38,10 +38,10 @@ row_pieces(Y, [Piece | Pieces], [RowPiece | RowPieces]) :- % Match
     row_pieces(Y, Pieces, RowPieces), !.
 
 row_pieces(Y, [Piece | Pieces], RowPieces) :- % No match
-    Piece = piece(_, _, _/PieceY),
+    Piece = piece:position(Piece, _/PieceY),
     
     % Row numbers must not match
-    PieceY \= Y,
+    PieceY \== Y,
 
     % Recursive call
     row_pieces(Y, Pieces, RowPieces), !.

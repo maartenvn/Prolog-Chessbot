@@ -90,7 +90,7 @@ pieces(State, [Position | Positions], [Piece | Pieces]) :- % Piece at current po
     piece_at_position(State, Position, Piece),
 
     % Piece must not be none
-    Piece \= none,
+    Piece \== none,
 
     % Recursive call
     pieces(State, Positions, Pieces), !.

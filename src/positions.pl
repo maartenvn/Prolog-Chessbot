@@ -107,7 +107,7 @@ square_position(Piece, State, XPos/YPos) :-
     between(YMinus, YPlus, YPos),
 
     % Position must not be (X/Y)
-    XPos/YPos \= X/Y,
+    XPos/YPos \== X/Y,
 
     % New position must be valid
     valid_position(XPos/YPos),
@@ -167,7 +167,7 @@ opponent_position(X/Y, Color, State, OpponentPiece) :-
     state:piece_at_position(State, X/Y, piece(PieceColor, PieceType, _)),
 
     % Piece color must match opponent color
-    PieceColor = OpponentColor,
+    PieceColor == OpponentColor,
 
     % Opponent Piece
     OpponentPiece = piece(OpponentColor, PieceType, X/Y).

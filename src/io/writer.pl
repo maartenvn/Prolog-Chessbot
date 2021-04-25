@@ -92,7 +92,7 @@ extract_rokades_color(Color, [Rokade | Rokades], [ColorRokade | ColorRokades]) :
     Rokade = rokade(RokadeColor, _),
 
     % Color must match
-    Color = RokadeColor,
+    Color == RokadeColor,
 
     % Append to the list
     ColorRokade = Rokade, !,
@@ -104,7 +104,7 @@ extract_rokades_color(Color, [Rokade | Rokades], ColorRokades) :- % No match
     Rokade = rokade(RokadeColor, _),
 
     % Color must not match
-    Color \= RokadeColor,
+    Color \== RokadeColor,
 
     % Recursive call
     extract_rokades_color(Color, Rokades, ColorRokades), !.
