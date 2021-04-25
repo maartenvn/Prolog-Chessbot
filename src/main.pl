@@ -6,9 +6,6 @@
 :- use_module("alphabeta").
 :- use_module("state").
 
-% TODO: remove
-:- use_module("positions").
-
 
 main :-
     current_prolog_flag(argv, Args),
