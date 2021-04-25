@@ -2,6 +2,7 @@
 
 :- use_module("positions").
 :- use_module("moves").
+:- use_module("pieces").
 
 
 %! position(+Piece, -Position)
