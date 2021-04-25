@@ -44,21 +44,24 @@ all_possible_states(_, [], []) :- !.                                            
 % Update the state with a given move for a given piece.
 do_move(Move, CurrentState, NewState) :-
     Move = move(DeletePieces, AppendPieces, DeleteRokades, NewPassant),
-    state:pieces(CurrentState, CurrentPieces),
-    state:rokades(CurrentState, CurrentRokades),
+
+    % Next color
     state:nextcolor(CurrentState, NewColor),
 
     % Delete pieces
-    util:delete_list(CurrentPieces, DeletePieces, NewPiecesDeleted),
+    state:remove_pieces(CurrentState, DeletePieces, PartialState1),
 
-    % Append pieces
-    append(NewPiecesDeleted, AppendPieces, NewPieces),
+    % Add pieces
+    state:set_pieces(PartialState1, AppendPieces, PartialState2),
 
     % Delete Rokades
-    util:delete_list(CurrentRokades, DeleteRokades, NewRokades),
+    state:remove_rokades(PartialState2, DeleteRokades, PartialState3),
 
-    % Create the new state
-    NewState = state(NewPieces, NewColor, NewRokades, NewPassant).
+    % Update passant
+    state:set_passant(PartialState3, NewPassant, PartialState4),
+
+    % Update color
+    state:set_color(PartialState4, NewColor, NewState).
 
 
 %! all_possible_moves/2(+State, -Moves)
@@ -457,7 +460,7 @@ create_move(CurrentPosition, NewPosition, State, Move) :-
 %
 %  Create a move for given positions and en-passant possability
 create_move(CurrentPosition, NewPosition, State, Passant, Move) :-
-    state:position_piece(CurrentPosition, State, CurrentPiece),
+    state:piece_at_position(State, CurrentPosition, CurrentPiece),
     create_piece_move(CurrentPiece, NewPosition, State, Passant, Move).
 
 

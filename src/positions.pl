@@ -131,6 +131,15 @@ valid_position(X/Y) :-
     between(1, 8, Y).
 
 
+%! empty_position(+X/+Y, +State)
+%
+%  Check if a given position is not taken by a piece.
+empty_position(X/Y, State) :-
+
+    % Piece at the given position must be none
+    state:piece_at_position(State, X/Y, none).
+
+
 %! opponent_position/3(+X/+Y, +Color, +State)
 %
 %  Check if a given position is taken by a piece of the opponent player.
@@ -143,26 +152,15 @@ opponent_position(X/Y, Color, State) :-
 %  Check if a given position is taken by a piece of the opponent player.
 %  Unify the piece with OpponentPiece.
 opponent_position(X/Y, Color, State, OpponentPiece) :-
-    state:pieces(State, Pieces),
 
     % Opponent color
     opponent(Color, OpponentColor),
 
-    % Opponent piece
+    % Piece at the given location must be of the opponent color
     OpponentPiece = piece(OpponentColor, _, X/Y),
 
-    % Piece must be of the opponent's color
-    memberchk(OpponentPiece, Pieces).
-
-
-%! empty_position(+X/+Y, +Color, +State)
-%
-%  Check if a given position is not taken by a piece.
-empty_position(X/Y, State) :-
-    state:pieces(State, Pieces),
-
-    % Location must be empty
-    not(memberchk(piece(_, _, X/Y), Pieces)).
+    % Piece at the given position must be as described above
+    state:piece_at_position(State, X/Y, OpponentPiece).
 
 
 %! empty_or_opponent_position(+X/+Y, +Color, +State)
@@ -170,6 +168,26 @@ empty_position(X/Y, State) :-
 %  Check if a position is empty or taken by a piece of the opponent player.
 empty_or_opponent_position(X/Y, _, State) :- empty_position(X/Y, State), !.
 empty_or_opponent_position(X/Y, Color, State) :- opponent_position(X/Y, Color, State), !.
+
+
+%! next_position(+X/+Y, +XNew/+YNew)
+%
+%  Next position when iteratively looping over all positions.
+%  Will not check if the next position is valid.
+next_position(X/Y, XNew/YNew) :-    % X is end of the row
+
+    % X is the end of the row
+    X = 8,
+
+    % Increment Y and reset X
+    XNew is 1,
+    YNew is Y + 1, !.
+
+next_position(X/Y, XNew/YNew) :-    % X is end of the row
+
+    % Increment X
+    XNew is X + 1,
+    YNew is Y, !.
 
 
 %! opponent(+Color, -OpponentColor)
