@@ -26,7 +26,7 @@ color(piece(Color, _, _), Color).
 %
 %  List of pieces for a given row.
 row_pieces(Y, [Piece | Pieces], [RowPiece | RowPieces]) :- % Match
-    Piece = piece:position(Piece, _/PieceY),
+    Piece = pieces:position(Piece, _/PieceY),
 
     % Row numbers must match
     PieceY == Y,
@@ -38,7 +38,7 @@ row_pieces(Y, [Piece | Pieces], [RowPiece | RowPieces]) :- % Match
     row_pieces(Y, Pieces, RowPieces), !.
 
 row_pieces(Y, [Piece | Pieces], RowPieces) :- % No match
-    Piece = piece:position(Piece, _/PieceY),
+    Piece = pieces:position(Piece, _/PieceY),
     
     % Row numbers must not match
     PieceY \== Y,
