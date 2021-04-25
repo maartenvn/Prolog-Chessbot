@@ -6,6 +6,9 @@
 :- use_module("alphabeta").
 :- use_module("state").
 
+% TODO: remove
+:- use_module("positions").
+
 
 main :-
     current_prolog_flag(argv, Args),
@@ -19,7 +22,7 @@ handle_main([_]) :- % Test Mode TODO: this must parse "TEST"
 
     % Get all possible states for the current state
     moves:all_possible_states(State, NextStates),
-
+    
     % Print all possible states
     writer:write_states(NextStates).
 

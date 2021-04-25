@@ -165,17 +165,25 @@ piece_at_position(State, X/Y, Piece) :-
 %
 %  Set a piece at a given position on the board of the given state.
 %  TODO: ask if we can use setarg.
+%  TODO: this predicate can improve performance (ask about duplicate terms)
 set_piece_at_position(State, Piece, X/Y, NewState) :-
-
-    % Duplicate state to prevent in-place editing of "setarg"
-    duplicate_term(State, NewState),
-    state:board(NewState, Board),
+    state:board(State, Board),
 
     % Get the row of the given position
     arg(Y, Board, Row),
 
-    % Update the piece
-    setarg(X, Row, Piece), !.
+    % Duplicate board & row to prevent setarg from altering other states.
+    duplicate_term(Board, NewBoard),
+    duplicate_term(Row, NewRow),
+
+    % Update the position in the row
+    setarg(X, NewRow, Piece),
+
+    % Update the board
+    setarg(Y, NewBoard, NewRow),
+    
+    % Update the state
+    set_board(State, NewBoard, NewState), !.
 
 
 %! set_piece(+State, +Piece, -NewState)
@@ -251,6 +259,18 @@ remove_rokades(State, [Rokade | Rokades], NewState) :-
     % Recursive call
     remove_rokades(PartialState, Rokades, NewState), !.
 remove_rokades(State, [], State) :- !.
+
+
+%! set_board(+State, +Board, -NewState)
+%
+%  Set new board value
+set_board(State, Board, NewState) :-
+    state:currentcolor(State, CurrentColor),
+    state:rokades(State, Rokades),
+    state:passant(State, Passant),
+
+    % Create the new state
+    NewState = state(Board, CurrentColor, Rokades, Passant).
 
 
 %! set_passant(+State, +Passant, -NewState)
