@@ -73,79 +73,66 @@ passant(state(_, _, _, Passant), Passant).
 %
 %  List of pieces that are currently on the board
 pieces(State, Pieces) :-
-    pieces(State, 1/1, Pieces).
+
+    % Find all possible positions on the board
+    findall(X/Y, positions:valid_position(X/Y), Positions),
+    
+    % Helper predicate
+    pieces(State, Positions, Pieces).
 
 
-%! pieces/3(+State, +X/+Y, -Pieces)
+%! pieces/3(+State, +Positions, -Pieces)
 %
 %  Helper predicate for pieces/3
-pieces(State, X/Y, [Piece | Pieces]) :- % Piece at current position is not "none"
-    % Position must be valid
-    positions:valid_position(X/Y),
+pieces(State, [Position | Positions], [Piece | Pieces]) :- % Piece at current position is not "none"
     
     % Piece at the current position
-    piece_at_position(State, X/Y, Piece),
+    piece_at_position(State, Position, Piece),
 
     % Piece must not be none
     Piece \= none,
 
-    % Next position
-    positions:next_position(X/Y, XNew/YNew), !,
-
     % Recursive call
-    pieces(State, XNew/YNew, Pieces), !.
+    pieces(State, Positions, Pieces), !.
     
-pieces(State, X/Y, Pieces) :-           % Piece at current position is "none"
-    % Position must be valid
-    positions:valid_position(X/Y),
-
-    % Next position
-    positions:next_position(X/Y, XNew/YNew), !,
+pieces(State, [_ | Positions], Pieces) :-                  % Piece at current position is "none"
 
     % Recursive call
-    pieces(State, XNew/YNew, Pieces), !.
+    pieces(State, Positions, Pieces), !.
 
-pieces(_, _, []) :- !.                  % Base case
+pieces(_, [], []) :- !.                                    % Base case
 
 
 %! color_pieces/3(+State, +Color, -ColorPieces)
 %
 %  Unify all pieces for a given Color from the given state.
 color_pieces(State, Color, ColorPieces) :-
-    color_pieces(State, Color, 1/1, ColorPieces).
+    % Find all possible positions on the board
+    positions:valid_positions(Positions),
+
+    color_pieces(State, Color, Positions, ColorPieces).
 
 
-%! color_pieces/4(+State, +Color, +X/+Y, -ColorPieces)
+%! color_pieces/4(+State, +Color, +Positions, -ColorPieces)
 %
 %  Helper predicate for color_pieces/3
-color_pieces(State, Color, X/Y, [ColorPiece | ColorPieces]) :- % Piece at current position is of the given color
-    
-    % Position must be valid
-    positions:valid_position(X/Y),
+color_pieces(State, Color, [Position | Positions], [ColorPiece | ColorPieces]) :- % Piece at current position is of the given color
     
     % Piece at the current position
-    piece_at_position(State, X/Y, ColorPiece),
+    piece_at_position(State, Position, ColorPiece),
 
     % Color must match
     pieces:color(ColorPiece, Color),
 
-    % Next position
-    positions:next_position(X/Y, XNew/YNew), !,
-
     % Recursive call
-    color_pieces(State, Color, XNew/YNew, ColorPieces), !.
+    color_pieces(State, Color, Positions, ColorPieces), !.
 
-color_pieces(State, Color, X/Y, ColorPieces) :-               % Piece at current position is "none" or not of the given color
-    % Position must be valid
-    positions:valid_position(X/Y),
-
-    % Next position
-    positions:next_position(X/Y, XNew/YNew), !,
-
+color_pieces(State, Color, [_ | Positions], ColorPieces) :-                      % Piece at current position is "none" or not of the given color
+    
     % Recursive call
-    color_pieces(State, Color, XNew/YNew, ColorPieces), !.
+    color_pieces(State, Color, Positions, ColorPieces), !.
 
-color_pieces(_, _, _, []) :- !.                               % Base case
+color_pieces(_, _, [], []) :- !.                                                 % Base case
 
 
 %! piece_at_position(+State, +X/+Y, -Piece).

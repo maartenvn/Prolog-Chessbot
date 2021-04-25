@@ -131,6 +131,13 @@ valid_position(X/Y) :-
     between(1, 8, Y).
 
 
+%! valid_positions(-Positions)
+%
+%  List of all possible positions on the board
+valid_positions(Positions) :-
+    findall(X/Y, valid_position(X/Y), Positions).
+
+
 %! empty_position(+X/+Y, +State)
 %
 %  Check if a given position is not taken by a piece.
@@ -171,26 +178,6 @@ opponent_position(X/Y, Color, State, OpponentPiece) :-
 %  Check if a position is empty or taken by a piece of the opponent player.
 empty_or_opponent_position(X/Y, _, State) :- empty_position(X/Y, State), !.
 empty_or_opponent_position(X/Y, Color, State) :- opponent_position(X/Y, Color, State), !.
-
-
-%! next_position(+X/+Y, +XNew/+YNew)
-%
-%  Next position when iteratively looping over all positions.
-%  Will not check if the next position is valid.
-next_position(X/Y, XNew/YNew) :-    % X is end of the row
-
-    % X is the end of the row
-    X = 8,
-
-    % Increment Y and reset X
-    XNew = 1,
-    YNew is Y + 1, !.
-
-next_position(X/Y, XNew/YNew) :-    % X is end of the row
-
-    % Increment X
-    XNew is X + 1,
-    YNew = Y, !.
 
 
 %! opponent(+Color, -OpponentColor)
