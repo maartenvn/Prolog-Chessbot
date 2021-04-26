@@ -19,7 +19,7 @@ alphabeta(Player, CurrentState, 0, _, _, CurrentState, BestScore) :-            
 alphabeta(Player, CurrentState, Depth, LowerBound, UpperBound, BestState, BestScore) :- % Continue building the game tree
 
     % Determin all possible next states for the current state
-    moves:all_possible_states(CurrentState, NextStates),
+    state:all_possible_states(CurrentState, NextStates),
 
     % Next States must not be empty (otherwise there is a checkmate)
     NextStates \= [],

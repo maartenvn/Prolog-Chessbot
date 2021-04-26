@@ -5,40 +5,6 @@
 :- use_module("pieces").
 :- use_module("util").
 
-%! all_possible_states/2(+CurrentState, -NextStates)
-%
-%  Generate all possible next states for a given state
-all_possible_states(CurrentState, NextStates) :-
-    state:currentcolor(CurrentState, CurrentColor),
-
-    % All pseudo-possible moves for the next player
-    moves:all_possible_moves(CurrentColor, CurrentState, NextMoves),
-
-    % Helper predicate
-    all_possible_states(CurrentState, NextMoves, NextStates).
-
-
-%! all_possible_states/3(+CurrentState, +Moves, -NextStates)
-%
-%  Generate a new state for every possible move and append it to a list.
-all_possible_states(CurrentState, [Move | Moves], [NextState | NextStates]) :-  % Valid pseudo-move
-    state:currentcolor(CurrentState, CurrentColor),
-
-    % Do the move and retrieve the new state
-    do_move(Move, CurrentState, NextState),
-
-    % State must not be in-check
-    % If this state causes a check, it is not a valid state
-    not(state:check(NextState, CurrentColor)),
-    
-    % Recursive call
-    all_possible_states(CurrentState, Moves, NextStates), !.
-all_possible_states(CurrentState, [_ | Moves], NextStates) :-                   % Invalid pseudo-move
-    % Recursive call
-    all_possible_states(CurrentState, Moves, NextStates), !.
-all_possible_states(_, [], []) :- !.                                            % Base-Case
-
-
 %! do_move(+Move, +CurrentState, -NewState)
 %
 % Update the state with a given move for a given piece.

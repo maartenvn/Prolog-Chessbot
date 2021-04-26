@@ -18,7 +18,7 @@ handle_main([_]) :- % Test Mode TODO: this must parse "TEST"
     phrase_from_stream(parser:parse_state(State), current_input),
 
     % Get all possible states for the current state
-    moves:all_possible_states(State, NextStates),
+    state:all_possible_states(State, NextStates),
     
     % Print all possible states
     writer:write_states(NextStates).
@@ -32,7 +32,7 @@ handle_main([]) :- % Move Mode
     state:currentcolor(State, Player),
 
     % Determin the next best move
-    alphabeta:alphabeta(Player, State, 4, -100000, 100000, BestState, _),
+    alphabeta:alphabeta(Player, State, 3, -100000, 100000, BestState, _),
 
     % Print the best state
     writer:write_state(BestState).

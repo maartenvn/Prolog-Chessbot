@@ -5,6 +5,37 @@
 :- use_module("positions").
 
 
+%! board(+State, -Board)
+%
+%  Extract the board from the given state.
+board(state(Board, _, _, _), Board).
+
+
+%! currentcolor(+State, -CurrentColor)
+%
+%  Extract the current color (the player that can do the current move) from the given state.
+currentcolor(state(_, CurrentColor, _, _), CurrentColor).
+
+
+%! nextcolor(+State, -NextColor)
+%
+%  Extract the next color (the player that can do a move after the current player did a move) from the given state.
+nextcolor(state(_, white, _, _), black).
+nextcolor(state(_, black, _, _), white).
+
+
+%! rokades(+State, -Rokades)
+%
+%  Extract the remaining rokades from the given state.
+rokades(state(_, _, Rokades, _), Rokades).
+
+
+%! passant(+State, -Passant)
+%
+%  Extract the en-passant possibility from the given state.
+passant(state(_, _, _, Passant), Passant).
+
+
 %! empty_state(+CurrentColor, +Rokades, +Passant, -State)
 %
 %  Create a state with an empty board.
@@ -37,36 +68,38 @@ create_state(Pieces, CurrentColor, Rokades, Passant, State) :-
     % Set the pieces
     set_pieces(EmptyState, Pieces, State).
 
-
-%! board(+State, -Board)
+%! all_possible_states/2(+CurrentState, -NextStates)
 %
-%  Extract the board from the given state.
-board(state(Board, _, _, _), Board).
+%  Generate all possible next states for a given state
+all_possible_states(CurrentState, NextStates) :-
+    state:currentcolor(CurrentState, CurrentColor),
+
+    % All pseudo-possible moves for the next player
+    moves:all_possible_moves(CurrentColor, CurrentState, NextMoves),
+
+    % Helper predicate
+    all_possible_states(CurrentState, NextMoves, NextStates).
 
 
-%! currentcolor(+State, -CurrentColor)
+%! all_possible_states/3(+CurrentState, +Moves, -NextStates)
 %
-%  Extract the current color (the player that can do the current move) from the given state.
-currentcolor(state(_, CurrentColor, _, _), CurrentColor).
+%  Generate a new state for every possible move and append it to a list.
+all_possible_states(CurrentState, [Move | Moves], [NextState | NextStates]) :-  % Valid pseudo-move
+    state:currentcolor(CurrentState, CurrentColor),
 
+    % Do the move and retrieve the new state
+    moves:do_move(Move, CurrentState, NextState),
 
-%! nextcolor(+State, -NextColor)
-%
-%  Extract the next color (the player that can do a move after the current player did a move) from the given state.
-nextcolor(state(_, white, _, _), black).
-nextcolor(state(_, black, _, _), white).
-
-
-%! rokades(+State, -Rokades)
-%
-%  Extract the remaining rokades from the given state.
-rokades(state(_, _, Rokades, _), Rokades).
-
-
-%! passant(+State, -Passant)
-%
-%  Extract the en-passant possibility from the given state.
-passant(state(_, _, _, Passant), Passant).
+    % State must not be in-check
+    % If this state causes a check, it is not a valid state
+    not(state:check(NextState, CurrentColor)),
+    
+    % Recursive call
+    all_possible_states(CurrentState, Moves, NextStates), !.
+all_possible_states(CurrentState, [_ | Moves], NextStates) :-                   % Invalid pseudo-move
+    % Recursive call
+    all_possible_states(CurrentState, Moves, NextStates), !.
+all_possible_states(_, [], []) :- !.                                            % Base-Case
 
 
 %! pieces/2(+State, -Pieces)
