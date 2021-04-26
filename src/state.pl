@@ -1,8 +1,8 @@
 :- module(state, []).
 
-:- use_module("moves").
-:- use_module("pieces").
-:- use_module("positions").
+:- use_module("move").
+:- use_module("piece").
+:- use_module("position").
 
 
 %! board(+State, -Board)
@@ -75,7 +75,7 @@ all_possible_states(CurrentState, NextStates) :-
     state:currentcolor(CurrentState, CurrentColor),
 
     % All pseudo-possible moves for the next player
-    moves:all_possible_moves(CurrentColor, CurrentState, NextMoves),
+    move:all_possible_moves(CurrentColor, CurrentState, NextMoves),
 
     % Helper predicate
     all_possible_states(CurrentState, NextMoves, NextStates).
@@ -88,7 +88,7 @@ all_possible_states(CurrentState, [Move | Moves], [NextState | NextStates]) :-  
     state:currentcolor(CurrentState, CurrentColor),
 
     % Do the move and retrieve the new state
-    moves:do_move(Move, CurrentState, NextState),
+    move:do_move(Move, CurrentState, NextState),
 
     % State must not be in-check
     % If this state causes a check, it is not a valid state
@@ -108,7 +108,7 @@ all_possible_states(_, [], []) :- !.                                            
 pieces(State, Pieces) :-
 
     % Find all possible positions on the board
-    findall(X/Y, positions:valid_position(X/Y), Positions),
+    findall(X/Y, position:valid_position(X/Y), Positions),
     
     % Helper predicate
     pieces(State, Positions, Pieces).
@@ -141,7 +141,7 @@ pieces(_, [], []) :- !.                                    % Base case
 %  Unify all pieces for a given Color from the given state.
 color_pieces(State, Color, ColorPieces) :-
     % Find all possible positions on the board
-    positions:valid_positions(Positions),
+    position:valid_positions(Positions),
 
     color_pieces(State, Color, Positions, ColorPieces).
 
@@ -155,7 +155,7 @@ color_pieces(State, Color, [Position | Positions], [ColorPiece | ColorPieces]) :
     piece_at_position(State, Position, ColorPiece),
 
     % Color must match
-    pieces:color(ColorPiece, Color),
+    piece:color(ColorPiece, Color),
 
     % Recursive call
     color_pieces(State, Color, Positions, ColorPieces), !.
@@ -210,7 +210,7 @@ set_piece_at_position(State, Piece, X/Y, NewState) :-
 %
 %  Set a piece on the board in a given state.
 set_piece(State, Piece, NewState) :-
-    pieces:position(Piece, X/Y),
+    piece:position(Piece, X/Y),
 
     % Set the piece at the given position
     set_piece_at_position(State, Piece, X/Y, NewState).
@@ -233,7 +233,7 @@ set_pieces(State, [], State) :- !.
 %
 %  Remove a piece from the board in a given state.
 remove_piece(State, Piece, NewState) :-
-    pieces:position(Piece, X/Y),
+    piece:position(Piece, X/Y),
 
     % Set the piece position to none
     set_piece_at_position(State, none, X/Y, NewState).
@@ -339,13 +339,13 @@ check(State, Color) :-
 %  If a given piece can be attacked in the given state.
 %  TODO: can be more efficient by only evaluating moves when necessary!!!!
 can_be_attacked(Piece, State) :-
-    pieces:color(Piece, Color),
+    piece:color(Piece, Color),
     
     % Opponent Color
-    positions:opponent(Color, OpponentColor),
+    position:opponent(Color, OpponentColor),
 
     % All possible moves by the opponent
-    moves:all_possible_moves(OpponentColor, State, Moves),
+    move:all_possible_moves(OpponentColor, State, Moves),
 
     % Helper predicate
     can_be_attacked_for_moves(Piece, Moves).

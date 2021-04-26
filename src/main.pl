@@ -2,7 +2,7 @@
 
 :- use_module("io/parser").
 :- use_module("io/writer").
-:- use_module("moves").
+:- use_module("move").
 :- use_module("alphabeta").
 :- use_module("state").
 

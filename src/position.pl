@@ -1,7 +1,7 @@
-:- module(positions, []).
+:- module(position, []).
 
 :- use_module("state").
-:- use_module("pieces").
+:- use_module("piece").
 
 
 %! pawn_start_position(+X/+Y, +Color)
@@ -28,8 +28,8 @@ pawn_passant_position(_/5, black).
 %! forward_position(+X/+Y, +Color, +X/-Y)
 % 
 %  Forward for a given piece
-%  For white pieces: +1
-%  For black pieces: -1
+%  For white piece: +1
+%  For black piece: -1
 forward_position(X/Y, white, X/YNew) :- YNew is Y + 1.
 forward_position(X/Y, black, X/YNew) :- YNew is Y - 1.
 
@@ -92,8 +92,8 @@ horse_position(piece(Color, _, X/Y), State, XPos/YPos) :-
 %
 %  Position in a square around a given piece
 square_position(Piece, State, XPos/YPos) :-
-    pieces:color(Piece, Color),
-    pieces:position(Piece, X/Y),
+    piece:color(Piece, Color),
+    piece:position(Piece, X/Y),
 
     % TODO: create seperate predicate to use for [N - 1, N + 1]
     XMinus is X - 1,

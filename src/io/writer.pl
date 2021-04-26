@@ -2,9 +2,9 @@
 
 :- use_module("parser").
 :- use_module("../state").
-:- use_module("../positions").
-:- use_module("../moves").
-:- use_module("../pieces").
+:- use_module("../position").
+:- use_module("../move").
+:- use_module("../piece").
 
 
 %! write_state(+State)
@@ -66,10 +66,10 @@ extract_rows(Y, Pieces, [Row | Rows]) :-
     between(1, 8, Y), !,
 
     % Extract the row
-    pieces:row_pieces(Y, Pieces, UnsortedRow),
+    piece:row_pieces(Y, Pieces, UnsortedRow),
 
     % Sort the row
-    pieces:sorted_pieces(UnsortedRow, Row),
+    piece:sorted_pieces(UnsortedRow, Row),
 
     % Next row
     YNext is Y - 1,

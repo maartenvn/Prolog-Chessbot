@@ -1,7 +1,7 @@
-:- module(pieces, []).
+:- module(piece, []).
 
-:- use_module("positions").
-:- use_module("moves").
+:- use_module("position").
+:- use_module("move").
 
 
 %! position(+Piece, -Position)
