@@ -68,6 +68,7 @@ create_state(Pieces, CurrentColor, Rokades, Passant, State) :-
     % Set the pieces
     set_pieces(EmptyState, Pieces, State).
 
+
 %! all_possible_states/2(+CurrentState, -NextStates)
 %
 %  Generate all possible next states for a given state
@@ -108,7 +109,7 @@ all_possible_states(_, [], []) :- !.                                            
 pieces(State, Pieces) :-
 
     % Find all possible positions on the board
-    findall(X/Y, position:valid_position(X/Y), Positions),
+    position:valid_positions(Positions),
     
     % Helper predicate
     pieces(State, Positions, Pieces).
@@ -143,6 +144,7 @@ color_pieces(State, Color, ColorPieces) :-
     % Find all possible positions on the board
     position:valid_positions(Positions),
 
+    % Helper predicate
     color_pieces(State, Color, Positions, ColorPieces).
 
 
