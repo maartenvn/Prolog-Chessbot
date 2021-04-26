@@ -1,8 +1,8 @@
 :- begin_tests(lists).
 :- use_module(library(lists)).
-:- ["../src/positions"].
+:- ["../src/position"].
 
-% possible_positions: test if the king has the correct possible positions
+% possible_position: test if the king has the correct possible positions
 test(possible_moves__king) :-
 
     % List with possible positions
