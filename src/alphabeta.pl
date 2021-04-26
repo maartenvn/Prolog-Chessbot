@@ -3,6 +3,7 @@
 :- use_module("move").
 :- use_module("state").
 :- use_module("position").
+:- use_module("piece").
 
 % TODO:
 % * Replace mobility score by branching offset (longer branches have lower scores than higher branches)
@@ -198,7 +199,7 @@ score(Player, State, Score) :-
     score_player(Player, State, PlayerScore),
 
     % Score for the opponent
-    position:opponent(Player, OpponentPlayer),
+    piece:opponent(Player, OpponentPlayer),
     score_player(OpponentPlayer, State, OpponentScore),
 
     % Calculate the state score

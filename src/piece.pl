@@ -81,3 +81,10 @@ sorted_pieces(Pieces, X, SortedPieces) :-
     XNext is X + 1,
     sorted_pieces(Pieces, XNext, SortedPieces), !.
 sorted_pieces(_, _, []) :- !.
+
+
+%! opponent(+Color, -OpponentColor)
+%
+%  Opponent color for a given color
+opponent(white, black).
+opponent(black, white).

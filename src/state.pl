@@ -342,7 +342,7 @@ can_be_attacked(Piece, State) :-
     piece:color(Piece, Color),
     
     % Opponent Color
-    position:opponent(Color, OpponentColor),
+    piece:opponent(Color, OpponentColor),
 
     % All possible moves by the opponent
     move:all_possible_moves(OpponentColor, State, Moves),

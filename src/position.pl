@@ -166,7 +166,7 @@ opponent_position(X/Y, Color, State) :-
 opponent_position(X/Y, Color, State, OpponentPiece) :-
 
     % Opponent color
-    opponent(Color, OpponentColor),
+    piece:opponent(Color, OpponentColor),
 
     % Piece at the given position must be as described above
     state:piece_at_position(State, X/Y, piece(PieceColor, PieceType, _)),
@@ -183,11 +183,3 @@ opponent_position(X/Y, Color, State, OpponentPiece) :-
 %  Check if a position is empty or taken by a piece of the opponent player.
 empty_or_opponent_position(X/Y, _, State) :- empty_position(X/Y, State), !.
 empty_or_opponent_position(X/Y, Color, State) :- opponent_position(X/Y, Color, State), !.
-
-
-%! opponent(+Color, -OpponentColor)
-%
-%  Opponent color for a given color
-%  TODO: move to pieces.pl
-opponent(white, black).
-opponent(black, white).

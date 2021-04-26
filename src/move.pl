@@ -135,7 +135,7 @@ possible_moves(Piece, State, Moves) :-
 %  Will scan every move, check if the piece can be promoted, and create the correct promotions
 convert_promotion_moves(Piece, [Move | Moves], PromotionMoves) :-    % Current move is promotion move
     piece:color(Piece, Color),
-    position:opponent(Color, OpponentColor),
+    piece:opponent(Color, OpponentColor),
     Move = move(DeletePieces, AppendPieces, _, _),
 
     % Select the pawn
@@ -267,7 +267,7 @@ pawn_passant_moves(Piece, State, Moves) :-
     Passant = passant(PassantColor, _), % TODO: passant:color(Passant, PassantColor)
     
     % En-passant position must be for the opponent
-    position:opponent(PieceColor, PassantColor),
+    piece:opponent(PieceColor, PassantColor),
         
     % En-pasant for both directions
     pawn_passant_moves_part(Piece, State, -1, LeftMoves),
@@ -446,7 +446,7 @@ create_piece_move(CurrentPiece, NewPosition, State, Passant, Move) :-  % Opponen
     piece:position(CurrentPiece, Position),
 
     % Opponent color
-    position:opponent(Color, OpponentColor),
+    piece:opponent(Color, OpponentColor),
 
     % Opponent at the new position
     position:opponent_position(NewPosition, Color, State, OpponentPiece),
