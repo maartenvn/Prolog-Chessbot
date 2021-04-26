@@ -3,7 +3,6 @@
 :- use_module("state").
 :- use_module("position").
 :- use_module("piece").
-:- use_module("util").
 
 %! do_move(+Move, +CurrentState, -NewState)
 %
@@ -47,7 +46,6 @@ all_possible_moves(Color, State, Moves) :-
     state:color_pieces(State, Color, ColorPieces),
 
     % Get all possible moves for the pieces
-    % TODO: merge this statement inside this predicate using maplist & append.
     all_possible_moves_for_pieces(ColorPieces, State, Moves).
 
 
@@ -151,7 +149,6 @@ convert_promotion_moves(Piece, [Move | Moves], PromotionMoves) :-    % Current m
     position:rokades_position(NewPosition, OpponentColor, DeleteRokades),  % If king/tower is captured
 
     % Create the promotion moves
-    % TODO: move to create_position
     PromotionMovesCurrent = [
         move(DeletePieces, [piece(Color, queen, NewPosition)], DeleteRokades, none),
         move(DeletePieces, [piece(Color, horse, NewPosition)], DeleteRokades, none),
@@ -364,8 +361,6 @@ path_moves(Piece, State, XDirection, YDirection, Moves) :-
 %
 %  Helper function for path_moves/5.
 %  Uses a StartPiece to correctly form the moves.  
-%
-%  TODO: ask prof about code duplication
 path_moves(StartPiece, X/Y, State, XDirection, YDirection, [Move | Moves]) :-
     
     % Unify the new position

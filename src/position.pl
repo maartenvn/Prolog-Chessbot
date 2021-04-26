@@ -2,6 +2,7 @@
 
 :- use_module("state").
 :- use_module("piece").
+:- use_module("util/utils").
 
 
 %! pawn_start_position(+X/+Y, +Color)
@@ -51,16 +52,10 @@ rokades_position(_, _, []) :- !.                                                
 %  Move that could be done by the horse from a given piece
 horse_position(piece(Color, _, X/Y), State, XPos/YPos) :-
 
-    % TODO: create seperate predicate to use for [N - 1, N + 1]
-    XMinus2 is X - 2,
-    XPlus2  is X + 2,
-    YMinus2 is Y - 2,
-    YPlus2  is Y + 2,
-
     % Positions in a square the current position
     % (X/Y) will also be unified
-    between(XMinus2, XPlus2, XPos),
-    between(YMinus2, YPlus2, YPos),
+    utils:between2(X, XPos),
+    utils:between2(Y, YPos),
 
     % New position must be valid
     valid_position(XPos/YPos),
@@ -95,16 +90,10 @@ square_position(Piece, State, XPos/YPos) :-
     piece:color(Piece, Color),
     piece:position(Piece, X/Y),
 
-    % TODO: create seperate predicate to use for [N - 1, N + 1]
-    XMinus is X - 1,
-    XPlus  is X + 1,
-    YMinus is Y - 1,
-    YPlus  is Y + 1,
-
     % Positions in a square the current position
     % (X/Y) will also be unified
-    between(XMinus, XPlus, XPos),
-    between(YMinus, YPlus, YPos),
+    utils:between1(X, XPos),
+    utils:between1(Y, YPos),
 
     % Position must not be (X/Y)
     XPos/YPos \== X/Y,
