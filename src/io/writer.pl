@@ -49,6 +49,31 @@ write_states([State | States]) :-
 write_states([]) :- !.
 
 
+%! write_draw()
+%
+%  Write "DRAW" to stdout.
+write_draw() :- write("DRAW").
+
+
+%! write_states_or_draw(+CurrentState, -NextStates)
+%
+%  Write all the states to stdout, or write "DRAW" in case of a stalemate
+
+% Stalemate
+write_states_or_draw(CurrentState, []) :-
+    state:currentcolor(CurrentState, CurrentColor),
+
+    % Check if the king is not check
+    not(state:check(CurrentState, CurrentColor)),
+
+    % Write "DRAW"
+    write_draw, !.
+
+% Write all states
+write_states_or_draw(_, NextStates) :-
+    write_states(NextStates), !.
+
+
 %! write_codes(+Codes)
 %
 %  Write a given list of codes to stdout.

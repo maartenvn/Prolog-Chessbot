@@ -22,7 +22,7 @@ alphabeta(Player, CurrentState, Depth, LowerBound, UpperBound, BestState, BestSc
     % Determin all possible next states for the current state
     state:all_possible_states(CurrentState, NextStates),
 
-    % Next States must not be empty (otherwise there is a checkmate)
+    % Next States must not be empty (otherwise there is a checkmate or a stalemate)
     NextStates \= [],
 
     % Decrement the depth
@@ -37,8 +37,17 @@ alphabeta(Player, CurrentState, Depth, LowerBound, UpperBound, BestState, BestSc
 alphabeta(Player, CurrentState, _, _, _, CurrentState, BestScore) :-                    % Leaf: a player is checkmate
     state:currentcolor(CurrentState, CheckmatePlayer),
 
+    % Make sure the king is check (otherwise a stalemate is reached)
+    state:check(CurrentState, CheckmatePlayer),
+
     % Calculate the score fot the current state.
     score_checkmate(Player, CheckmatePlayer, BestScore), !.
+
+alphabeta(Player, CurrentState, _, _, _, none, BestScore) :-                            % Leaf: a player is stalemate
+    state:currentcolor(CurrentState, StalematePlayer),
+
+    % Calculate the score fot the current state.
+    score_stalemate(Player, StalematePlayer, BestScore), !.
 
 
 %! best(+Player, +States, +Depth, +LowerBound, +UpperBound, -BestState, -BestScore)
@@ -225,6 +234,12 @@ score_player(Player, State, Score) :-
 %  Score when a given state is checkmate.
 score_checkmate(Player, Player, -10000) :- !.
 score_checkmate(_, _, 10000) :- !.
+
+
+%! score_stalemate(+Player, +StalematePlayer, -Score)
+%
+%  Score when a given state is stalemate.
+score_stalemate(_, _, 0) :- !.
 
 
 %! score_pieces(+Pieces, -Score)
