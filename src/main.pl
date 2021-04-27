@@ -31,8 +31,6 @@ handle_main([]) :- % Move Mode
     % Extract the player from the state
     state:currentcolor(State, Player),
 
-    state:all_possible_states(State, NextStates),
-
     % Determin the next best move
     alphabeta:alphabeta(Player, State, 3, -100000, 100000, BestState, _),
 
