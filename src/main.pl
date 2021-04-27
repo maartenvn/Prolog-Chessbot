@@ -2,7 +2,7 @@
 
 :- use_module("io/parser").
 :- use_module("io/writer").
-:- use_module("moves").
+:- use_module("move").
 :- use_module("alphabeta").
 :- use_module("state").
 
@@ -18,8 +18,8 @@ handle_main([_]) :- % Test Mode TODO: this must parse "TEST"
     phrase_from_stream(parser:parse_state(State), current_input),
 
     % Get all possible states for the current state
-    moves:all_possible_states(State, NextStates),
-
+    state:all_possible_states(State, NextStates),
+    
     % Print all possible states
     writer:write_states(NextStates).
 

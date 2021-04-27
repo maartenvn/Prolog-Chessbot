@@ -2,6 +2,7 @@
 
 :- use_module(library(pio)).
 :- use_module(library(dcg/basics)).
+:- use_module("../state").
 
 % Interpret quoted strings as ASCII character codes.
 :- set_prolog_flag(double_quotes, codes).
@@ -26,11 +27,11 @@ parse_state(State) -->
         append(RokadesList, Rokades),
 
         % Create state
-        State = state(Pieces, StartColor, Rokades, Passant),
+        state:create_state(Pieces, StartColor, Rokades, Passant, State),
 
         % Set passant to "none" if no en-passant move was unified
         % TODO: this is a dirty hack, ask for an alternative
-        (Passant = none, ! ; true)
+        (Passant == none, ! ; true)
     }.
 
 

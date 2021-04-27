@@ -2,9 +2,9 @@
 
 :- use_module("parser").
 :- use_module("../state").
-:- use_module("../positions").
-:- use_module("../moves").
-:- use_module("../pieces").
+:- use_module("../position").
+:- use_module("../move").
+:- use_module("../piece").
 
 
 %! write_state(+State)
@@ -66,10 +66,10 @@ extract_rows(Y, Pieces, [Row | Rows]) :-
     between(1, 8, Y), !,
 
     % Extract the row
-    pieces:row_pieces(Y, Pieces, UnsortedRow),
+    piece:row_pieces(Y, Pieces, UnsortedRow),
 
     % Sort the row
-    pieces:sorted_pieces(UnsortedRow, Row),
+    piece:sorted_pieces(UnsortedRow, Row),
 
     % Next row
     YNext is Y - 1,
@@ -92,7 +92,7 @@ extract_rokades_color(Color, [Rokade | Rokades], [ColorRokade | ColorRokades]) :
     Rokade = rokade(RokadeColor, _),
 
     % Color must match
-    Color = RokadeColor,
+    Color == RokadeColor,
 
     % Append to the list
     ColorRokade = Rokade, !,
@@ -104,7 +104,7 @@ extract_rokades_color(Color, [Rokade | Rokades], ColorRokades) :- % No match
     Rokade = rokade(RokadeColor, _),
 
     % Color must not match
-    Color \= RokadeColor,
+    Color \== RokadeColor,
 
     % Recursive call
     extract_rokades_color(Color, Rokades, ColorRokades), !.

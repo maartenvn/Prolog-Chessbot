@@ -1,8 +1,9 @@
 :- module(alphabeta, []).
 
-:- use_module("moves").
+:- use_module("move").
 :- use_module("state").
-:- use_module("positions").
+:- use_module("position").
+:- use_module("piece").
 
 % TODO:
 % * Replace mobility score by branching offset (longer branches have lower scores than higher branches)
@@ -19,7 +20,7 @@ alphabeta(Player, CurrentState, 0, _, _, CurrentState, BestScore) :-            
 alphabeta(Player, CurrentState, Depth, LowerBound, UpperBound, BestState, BestScore) :- % Continue building the game tree
 
     % Determin all possible next states for the current state
-    moves:all_possible_states(CurrentState, NextStates),
+    state:all_possible_states(CurrentState, NextStates),
 
     % Next States must not be empty (otherwise there is a checkmate)
     NextStates \= [],
@@ -166,7 +167,7 @@ best_of(Player, _, State2, Score1, Score2, BestState, BestScore) :- % Minimizing
 %  Since the state contains the player that can do the next move, the currentcolor must be different from the player.
 max(State, Player) :-
     state:currentcolor(State, CurrentPlayer),
-    CurrentPlayer \= Player.
+    CurrentPlayer \== Player.
 
 
 %! min(+State, +Player)
@@ -175,7 +176,7 @@ max(State, Player) :-
 %  Since the state contains the player that can do the next move, the currentcolor must be the same as the player.
 min(State, Player) :-
     state:currentcolor(State, CurrentPlayer),
-    CurrentPlayer = Player.
+    CurrentPlayer == Player.
 
 
 %! score(+Player, +State, -Score)
@@ -198,7 +199,7 @@ score(Player, State, Score) :-
     score_player(Player, State, PlayerScore),
 
     % Score for the opponent
-    positions:opponent(Player, OpponentPlayer),
+    piece:opponent(Player, OpponentPlayer),
     score_player(OpponentPlayer, State, OpponentScore),
 
     % Calculate the state score
@@ -210,7 +211,7 @@ score(Player, State, Score) :-
 %  Score for a given state for a given player.
 score_player(Player, State, Score) :-
     % Get the pieces for the given player
-    state:color_pieces(Player, State, ColorPieces),
+    state:color_pieces(State, Player, ColorPieces),
 
     % Evaluate every piece and add it's score to the scores
     score_pieces(ColorPieces, PiecesScore),

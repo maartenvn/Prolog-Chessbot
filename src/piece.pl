@@ -1,7 +1,7 @@
-:- module(pieces, []).
+:- module(piece, []).
 
-:- use_module("positions").
-:- use_module("moves").
+:- use_module("position").
+:- use_module("move").
 
 
 %! position(+Piece, -Position)
@@ -26,10 +26,10 @@ color(piece(Color, _, _), Color).
 %
 %  List of pieces for a given row.
 row_pieces(Y, [Piece | Pieces], [RowPiece | RowPieces]) :- % Match
-    Piece = piece(_, _, _/PieceY),
+    position(Piece, _/PieceY),
 
     % Row numbers must match
-    PieceY = Y,
+    PieceY == Y,
 
     % Append to the list
     RowPiece = Piece, !,
@@ -38,10 +38,10 @@ row_pieces(Y, [Piece | Pieces], [RowPiece | RowPieces]) :- % Match
     row_pieces(Y, Pieces, RowPieces), !.
 
 row_pieces(Y, [Piece | Pieces], RowPieces) :- % No match
-    Piece = piece(_, _, _/PieceY),
+    position(Piece, _/PieceY),
     
     % Row numbers must not match
-    PieceY \= Y,
+    PieceY \== Y,
 
     % Recursive call
     row_pieces(Y, Pieces, RowPieces), !.
@@ -81,3 +81,10 @@ sorted_pieces(Pieces, X, SortedPieces) :-
     XNext is X + 1,
     sorted_pieces(Pieces, XNext, SortedPieces), !.
 sorted_pieces(_, _, []) :- !.
+
+
+%! opponent(+Color, -OpponentColor)
+%
+%  Opponent color for a given color
+opponent(white, black).
+opponent(black, white).
