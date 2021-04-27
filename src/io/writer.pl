@@ -49,6 +49,12 @@ write_states([State | States]) :-
 write_states([]) :- !.
 
 
+%! write_draw()
+%
+%  Write "DRAW" to stdout.
+write_draw() :- write("DRAW").
+
+
 %! write_states_or_draw(+CurrentState, -NextStates)
 %
 %  Write all the states to stdout, or write "DRAW" in case of a stalemate
@@ -61,7 +67,7 @@ write_states_or_draw(CurrentState, []) :-
     not(state:check(CurrentState, CurrentColor)),
 
     % Write "DRAW"
-    write("DRAW"), !.
+    write_draw, !.
 
 % Write all states
 write_states_or_draw(_, NextStates) :-
