@@ -34,14 +34,14 @@ delete_rokades(Move, DeleteRokades) :-
 %
 %  Get the new en-passant possibility for a given move
 new_passant(Move, NewPassant) :-
-    move:append_pieces(Move, AppendPieces),
+    % When moving a piece 2 steps forward (and creating an en-passant possibility)
+    % the piece will never attack an opponent
+    move:delete_pieces(Move, [piece(Color, pawn, OldPosition)]),
+    move:append_pieces(Move, [piece(Color, pawn, NewPosition)]),
 
-    % Find the first piece with an en-passant possibility that is not none
-    include([Piece] >> (piece:passant_piece(Piece, Passant), Passant \== none), AppendPieces, [PassantPawn | _]),
-
-    % Unify the passant possibility
-    % TODO: this is double work, we are already getting the value above
-    piece:passant_piece(PassantPawn, NewPassant), !.
+    % Find the en-passant possibility
+    position:pawn_start_position(OldPosition, Color),
+    piece:passant_piece(piece(Color, pawn, NewPosition), NewPassant), !.
 new_passant(_, none) :- !.
 
 
