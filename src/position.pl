@@ -19,13 +19,6 @@ pawn_promotion_position(_/8, white).
 pawn_promotion_position(_/1, black).
 
 
-%! pawn_passant_position(+X/+Y, +Color)
-%
-%  Pawn is on a position where an en-passant is possible.
-pawn_passant_position(_/4, white).
-pawn_passant_position(_/5, black).
-
-
 %! forward_position(+X/+Y, +Color, +X/-Y)
 % 
 %  Forward for a given piece
@@ -33,18 +26,6 @@ pawn_passant_position(_/5, black).
 %  For black piece: -1
 forward_position(X/Y, white, X/YNew) :- YNew is Y + 1.
 forward_position(X/Y, black, X/YNew) :- YNew is Y - 1.
-
-
-%! rokades_position(+X+/Y, +Color, +Rokades)
-rokades_position(1/1, white, [rokade(white, long)]) :- !.                       % Tower
-rokades_position(8/1, white, [rokade(white, short)]) :- !.                      % Tower
-rokades_position(5/1, white, [rokade(white, long), rokade(white, short)]) :- !. % King
-
-rokades_position(1/8, black, [rokade(black, long)]) :- !.                       % Tower
-rokades_position(8/8, black, [rokade(black, short)]) :- !.                      % Tower
-rokades_position(5/8, black, [rokade(black, long), rokade(black, short)]) :- !. % King
-
-rokades_position(_, _, []) :- !.                                                % Base-case
 
 
 %! horse_position(+Piece, +State, -Position)
