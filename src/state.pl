@@ -357,7 +357,7 @@ can_be_attacked(Piece, State) :-
 %
 %  If a given piece can be attacked in a given list of moves.
 can_be_attacked_for_moves(Piece, [Move | _]) :-  % Can be attacked
-    Move = move(DeletePieces, _, _, _),
+    move:delete_pieces(Move, DeletePieces),
 
     % Piece is present inside the move
     memberchk(Piece, DeletePieces), !.
