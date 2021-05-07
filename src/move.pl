@@ -41,7 +41,8 @@ new_passant(Move, NewPassant) :-
 
     % Find the en-passant possibility
     position:pawn_start_position(OldPosition, Color),
-    piece:passant_piece(piece(Color, pawn, NewPosition), NewPassant).
+    piece:passant_piece(piece(Color, pawn, NewPosition), NewPassant), !.
+new_passant(_, none) :- !.
 
 
 %! do_move(+Move, +CurrentState, -NewState)
