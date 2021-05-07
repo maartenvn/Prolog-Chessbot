@@ -22,6 +22,28 @@ type(piece(_, Type, _), Type).
 color(piece(Color, _, _), Color).
 
 
+%! rokades_piece(+Piece, -Rokades)
+%
+%  List of rokades for a given piece
+rokades_piece(piece(white, tower, 1/1), [rokade(white, long)]) :- !.                      % Tower
+rokades_piece(piece(white, tower, 8/1), [rokade(white, short)]) :- !.                     % Tower
+rokades_piece(piece(white, king, 5/1), [rokade(white, long), rokade(white, short)]) :- !. % King
+
+rokades_piece(piece(black, tower, 1/8), [rokade(black, long)]) :- !.                      % Tower
+rokades_piece(piece(black, tower, 8/8), [rokade(black, short)]) :- !.                     % Tower
+rokades_piece(piece(black, king, 5/8), [rokade(black, long), rokade(black, short)]) :- !. % King
+
+rokades_piece(_, []) :- !. % Base case
+
+
+%! passant_piece(+Piece, -Passant)
+%
+%  En-passant possibility for a given piece
+passant_piece(piece(white, pawn, X/4), passant(white, X/3)) :- !.
+passant_piece(piece(black, pawn, X/5), passant(black, X/6)) :- !.
+passant_piece(_, none) :- !.
+
+
 %! row_pieces(+Y, +Pieces, -RowPieces)
 %
 %  List of pieces for a given row.
