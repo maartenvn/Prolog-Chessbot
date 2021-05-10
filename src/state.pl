@@ -330,7 +330,7 @@ check(State, Color) :-
     KingPiece = piece(Color, king, _),
 
     % Retrieve the king from the board
-    select(KingPiece, Pieces, _), !,
+    selectchk(KingPiece, Pieces, _), !,
 
     % Check if any opponent piece can attack the king of the given color
     can_be_attacked(KingPiece, State).
