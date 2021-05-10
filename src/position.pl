@@ -110,7 +110,6 @@ valid_position(X/Y) :-
 :- table valid_positions/1. % Memoization
 valid_positions(Positions) :-
     findall(X/Y, valid_position(X/Y), Positions).
-    
 
 
 %! empty_position(+X/+Y, +State)
@@ -151,5 +150,28 @@ opponent_position(X/Y, Color, State, OpponentPiece) :-
 %! empty_or_opponent_position(+X/+Y, +Color, +State)
 %
 %  Check if a position is empty or taken by a piece of the opponent player.
-empty_or_opponent_position(X/Y, _, State) :- empty_position(X/Y, State), !.
-empty_or_opponent_position(X/Y, Color, State) :- opponent_position(X/Y, Color, State), !.
+empty_or_opponent_position(X/Y, _, State) :- empty_position(X/Y, State).
+empty_or_opponent_position(X/Y, Color, State) :- opponent_position(X/Y, Color, State).
+
+
+%! empty_between_positions(+X1/+Y, +X2/+Y, +State)
+%
+%  If the positions between 2 coordinates (in a row line) are empty
+empty_between_positions(X/Y, X/Y, _).              % Base Case
+empty_between_positions(X1/Y, X2/Y, _) :-          % No positions between the given positions
+    XPlus is X1 + 1,
+
+    % There are no positions between the X1 & X2
+    XPlus == X2.
+empty_between_positions(X1/Y, X2/Y, State) :-      % Recursion Case
+    % X1 must be smaller than X2
+    X1 < X2,
+
+    % Position must be between X1 and X2
+    XPos is X1 + 1,
+
+    % New position must be empty
+    empty_position(XPos/Y, State),
+
+    % Recursive call
+    empty_between_positions(XPos/Y, X2/Y, State).

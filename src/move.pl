@@ -118,8 +118,14 @@ all_possible_moves_for_pieces([], _, []) :- !.
 possible_moves(Piece, State, Moves) :-
     piece:type(Piece, king),
 
+    % Rokades
+    findall(Move, rokades_move(Piece, State, Move), RokadesMoves),
+
     % King can move in a square
-    square_moves(Piece, State, Moves), !.
+    square_moves(Piece, State, SquareMoves),
+    
+    % Merge possible moves
+    append([RokadesMoves, SquareMoves], Moves), !.
 
 % Queen
 possible_moves(Piece, State, Moves) :-
@@ -237,7 +243,7 @@ pawn_forward_moves(Piece, State, [Move1, Move2]) :- % Pawn on start position (ca
     create_move(CurrentPosition, NewPosition1, State, Move1),
     create_move(CurrentPosition, NewPosition2, State, Move2), !.
 
-pawn_forward_moves(Piece, State, [Move1]) :-       % Pawn (can move max 1 step forward)
+pawn_forward_moves(Piece, State, [Move1]) :-        % Pawn (can move max 1 step forward)
     piece:type(Piece, pawn),
     piece:position(Piece, CurrentPosition),
     piece:color(Piece, Color),
@@ -348,6 +354,58 @@ pawn_passant_moves_part(Piece, State, XDifference, [Move]) :-
 
 pawn_passant_moves_part(Piece, _, _, []) :- 
     piece:type(Piece, pawn), !.
+
+
+%! rokades_move(+King, +State, -Moves)
+%
+%  Rokades move for the king
+rokades_move(King, State, Move) :-   % Short rokade 
+    piece:color(King, Color),
+    piece:position(King, KingPosition),
+    state:rokades(State, Rokades),
+    _/Y = KingPosition,
+
+    % Short rokade
+    ShortRokade = rokade(Color, short),
+    memberchk(ShortRokade, Rokades),
+
+    % Tower for rokade
+    Tower = piece(Color, tower, TowerPosition),
+    piece:rokades_piece(Tower, [ShortRokade]),
+
+    % Check if the pieces between the tower and king are empty
+    position:empty_between_positions(KingPosition, TowerPosition, State),
+
+    % New pieces
+    NewKing  = piece(Color, king,  7/Y),
+    NewTower = piece(Color, tower, 6/Y),
+
+    % Create the move
+    Move = move([King, Tower], [NewKing, NewTower]).
+
+rokades_move(King, State, Move) :-   % Long rokade 
+    piece:color(King, Color),
+    piece:position(King, KingPosition),
+    state:rokades(State, Rokades),
+    _/Y = KingPosition,
+
+    % Long rokade
+    LongRokade = rokade(Color, long),
+    memberchk(LongRokade, Rokades),
+
+    % Tower for rokade
+    Tower = piece(Color, tower, TowerPosition),
+    piece:rokades_piece(Tower, [LongRokade]),
+
+    % Check if the pieces between the tower and king are empty
+    position:empty_between_positions(TowerPosition, KingPosition, State),
+
+    % New pieces
+    NewKing  = piece(Color, king,  3/Y),
+    NewTower = piece(Color, tower, 4/Y),
+
+    % Create the move
+    Move = move([King, Tower], [NewKing, NewTower]).
 
 
 %! square_moves(+Piece, +State, -Moves)
