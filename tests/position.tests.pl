@@ -5,7 +5,7 @@
 
 
 % horse_position/3 with no other pieces in radius
-test(horse_position__empty) :-
+test(horse_position__empty, [nondet]) :-
     Horse = piece(white, horse, 4/4),
     state:create_state([Horse], white, [], none, State),
 
@@ -19,7 +19,7 @@ test(horse_position__empty) :-
     utils:list_equals(ExpectedPositions, ReceivedPositions).
 
 % horse_position/3 with other pieces in radius
-test(horse_position__other) :-
+test(horse_position__other, [nondet]) :-
     Horse = piece(white, horse, 4/4),
     Opponent = piece(black, pawn, 3/6),
     Player = piece(white, pawn, 2/5),
@@ -36,7 +36,7 @@ test(horse_position__other) :-
 
 
 % square_position/3 with no other pieces in radius
-test(square_position__empty) :-
+test(square_position__empty, [nondet]) :-
     King = piece(white, king, 2/2),
     state:create_state([King], white, [], none, State),
 
@@ -50,7 +50,7 @@ test(square_position__empty) :-
     utils:list_equals(ExpectedPositions, ReceivedPositions).
 
 % square_position/3 with other pieces in radius
-test(square_position__empty) :-
+test(square_position__empty, [nondet]) :-
     King = piece(white, king, 2/2),
     Opponent = piece(black, pawn, 1/1),
     Player = piece(white, pawn, 3/1),
@@ -67,7 +67,7 @@ test(square_position__empty) :-
 
 
 % valid_position/1
-test(valid_position) :-
+test(valid_position, [nondet]) :-
 
     % Assert
     not(position:valid_position(9/1)),
@@ -77,7 +77,7 @@ test(valid_position) :-
 
 
 % empty_position/2
-test(empty_position) :-
+test(empty_position, [nondet]) :-
     Piece = piece(white, pawn, 1/1),
     state:create_state([Piece], white, [], none, State),
 
@@ -86,7 +86,7 @@ test(empty_position) :-
 
 
 % opponent_position/2: opponent present
-test(opponent_position__opponent) :-
+test(opponent_position__opponent, [nondet]) :-
     Piece = piece(black, pawn, 2/1),
     state:create_state([Piece], white, [], none, State),
 
@@ -95,7 +95,7 @@ test(opponent_position__opponent) :-
 
 
 % opponent_position/2: empty position
-test(opponent_position__opponent) :-
+test(opponent_position__opponent, [nondet]) :-
     Piece = piece(black, pawn, 2/1),
     state:create_state([Piece], white, [], none, State),
 
@@ -104,16 +104,16 @@ test(opponent_position__opponent) :-
 
 
 % opponent_position/2: color piece of player at location position
-test(opponent_position__opponent) :-
+test(opponent_position__opponent, [nondet]) :-
     Piece = piece(white, pawn, 2/1),
-    state:create_state([], white, [], none, State),
+    state:create_state([Piece], white, [], none, State),
 
     % Assert
     not(position:opponent_position(2/1, white, State)).
 
 
 % empty_or_opponent_position/3: empty
-test(empty_or_opponent_position__empty) :-
+test(empty_or_opponent_position__empty, [nondet]) :-
     state:create_state([], white, [], none, State),
 
     % Assert
@@ -121,7 +121,7 @@ test(empty_or_opponent_position__empty) :-
 
 
 % empty_or_opponent_position/3: opponent
-test(empty_or_opponent_position__opponent) :-
+test(empty_or_opponent_position__opponent, [nondet]) :-
     Piece = piece(white, pawn, 2/1),
     state:create_state([Piece], white, [], none, State),
 
@@ -130,7 +130,7 @@ test(empty_or_opponent_position__opponent) :-
 
 
 % empty_or_opponent_position/3: player piece
-test(empty_or_opponent_position__opponent) :-
+test(empty_or_opponent_position__opponent, [nondet]) :-
     Piece = piece(black, pawn, 2/1),
     state:create_state([Piece], white, [], none, State),
 
@@ -139,7 +139,7 @@ test(empty_or_opponent_position__opponent) :-
 
 
 % empty_between_positions/3: same coordinate
-test(empty_between_positions__same) :- 
+test(empty_between_positions__same, [nondet]) :- 
     state:create_state([], white, [], none, State),
     
     % Assert
@@ -147,7 +147,7 @@ test(empty_between_positions__same) :-
 
 
 % empty_between_positions/3: empty
-test(empty_between_positions__empty) :- 
+test(empty_between_positions__empty, [nondet]) :- 
     PieceLeft = piece(black, pawn, 1/1),
     PieceRight = piece(black, pawn, 3/1),
     state:create_state([PieceLeft, PieceRight], white, [], none, State),
@@ -157,7 +157,7 @@ test(empty_between_positions__empty) :-
 
 
 % empty_between_positions/3: not empty
-test(empty_between_positions__notempty) :- 
+test(empty_between_positions__notempty, [nondet]) :- 
     PieceLeft = piece(black, pawn, 1/1),
     PieceMiddle = piece(black, pawn, 2/1),
     PieceRight = piece(black, pawn, 4/1),
