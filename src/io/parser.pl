@@ -30,7 +30,6 @@ parse_state(State) -->
         state:create_state(Pieces, StartColor, Rokades, Passant, State),
 
         % Set passant to "none" if no en-passant move was unified
-        % TODO: this is a dirty hack, ask for an alternative
         (Passant = none, ! ; true)
     }.
 

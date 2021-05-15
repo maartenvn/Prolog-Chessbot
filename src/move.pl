@@ -308,7 +308,7 @@ pawn_passant_moves(Piece, State, Moves) :-
     piece:color(Piece, PieceColor),
     state:passant(State, Passant),
 
-    Passant = passant(PassantColor, _), % TODO: passant:color(Passant, PassantColor)
+    Passant = passant(PassantColor, _),
     
     % En-passant position must be for the opponent
     piece:opponent(PieceColor, PassantColor),
@@ -329,15 +329,13 @@ pawn_passant_moves(Piece, _, []) :-
 %  Moves for the given pawn doing en-passant either left or right
 %  XDifference = 1: right en-passant move
 %  XDifference = -1: left en-passant move
-%
-%  TODO: List of moves to single move (because a list is useless here)
 pawn_passant_moves_part(Piece, State, XDifference, [Move]) :-
     piece:type(Piece, pawn),
     piece:color(Piece, PieceColor),
     piece:position(Piece, X/Y),
     state:passant(State, Passant),
 
-    Passant = passant(PassantColor, XPassant/YPassant), % TODO: passant:color(Passant, PassantColor), passant:position(Passant, XPassant/YPassant)
+    Passant = passant(PassantColor, XPassant/YPassant),
 
     % Check if the passant possibility is next to piece.
     XPassant is X + XDifference, 

@@ -186,8 +186,6 @@ piece_at_position(State, X/Y, Piece) :-
 %! set_piece_at_position(+State, +Piece, +X/+Y, -NewState)
 %
 %  Set a piece at a given position on the board of the given state.
-%  TODO: ask if we can use setarg.
-%  TODO: this predicate can improve performance (ask about duplicate terms)
 set_piece_at_position(State, Piece, X/Y, NewState) :-
     state:board(State, Board),
 
@@ -339,7 +337,6 @@ check(State, Color) :-
 %! can_be_attacked/2(+Piece, +State)
 %
 %  If a given piece can be attacked in the given state.
-%  TODO: can be more efficient by only evaluating moves when necessary!!!!
 can_be_attacked(Piece, State) :-
     piece:color(Piece, Color),
     

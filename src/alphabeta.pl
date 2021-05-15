@@ -5,8 +5,6 @@
 :- use_module("position").
 :- use_module("piece").
 
-% TODO:
-% * Replace mobility score by branching offset (longer branches have lower scores than higher branches)
 
 %! alphabeta(+Player, +CurrentState, +Depth, +LowerBound, +UpperBound, -BestState, -BestScore)
 %  
