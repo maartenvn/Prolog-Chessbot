@@ -189,7 +189,7 @@ min(State, Player) :-
 %! score(+Player, +State, -Score)
 %
 %  Score for a given state.
-%  
+%
 %  This scoring predicate is a symmetric evaluation function that will score the current state of the board.
 %  It does not keep track of previous states or boards and just evaluates the current state, as is.
 %
@@ -200,7 +200,16 @@ min(State, Player) :-
 %  This way boards with a large difference will receive a higher score
 %  => If the player has a higher score, the overal score will be positive
 %  => If the opponent has a higher score, the overal score will be negative
-score(Player, State, Score) :-
+
+score(Player, State, Score) :- % Checkmate or stalemate
+
+    % Make sure the player cannot do any more moves
+    state:all_possible_states(State, []),
+
+    % Checkmate or stalemate
+    score_checkmate_or_stalemate(Player, State, Score).
+
+score(Player, State, Score) :- % Symmetric evaluation scoring function
 
     % Score for the player
     score_player(Player, State, PlayerScore),
@@ -225,6 +234,27 @@ score_player(Player, State, Score) :-
 
     % Add all the scores together
     Score = PiecesScore.
+
+
+%! score_checkmate_or_stalemate(+Player, +State, -Score)
+%
+%  Score when a given player is either checkmate or stalemate.
+%  If the player is checkmate, return the checkmate score.
+%  If the player is stalemate, return the stalemate score.
+score_checkmate_or_stalemate(Player, State, Score) :-   % Checkmate
+    state:currentcolor(State, CurrentPlayer),
+
+    % Make sure the king is check (otherwise a stalemate is reached)
+    state:check(State, CurrentPlayer),
+
+    % Checkmate score
+    score_checkmate(Player, CurrentPlayer, Score).
+
+score_checkmate_or_stalemate(Player, State, Score) :-   % Stalemate
+    state:currentcolor(State, CurrentPlayer),
+
+    % Checkmate score
+    score_stalemate(Player, CurrentPlayer, Score).
 
 
 %! score_checkmate(+Player, +CheckmatePlayer, -Score)
