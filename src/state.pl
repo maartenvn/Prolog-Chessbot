@@ -82,25 +82,27 @@ all_possible_states(CurrentState, NextStates) :-
     all_possible_states(CurrentState, NextMoves, NextStates).
 
 
-%! all_possible_states/3(+CurrentState, +Moves, -NextStates)
+%! all_possible_states/3(+CurrentState, +Moves, ?NextStates)
 %
 %  Generate a new state for every possible move and append it to a list.
-all_possible_states(CurrentState, [Move | Moves], [NextState | NextStates]) :-  % Valid pseudo-move
+all_possible_states(CurrentState, [Move | Moves], NextStates) :-  % Valid pseudo-move
     state:currentcolor(CurrentState, CurrentColor),
 
     % Do the move and retrieve the new state
     move:do_move(Move, CurrentState, NextState),
 
-    % State must not be in-check
-    % If this state causes a check, it is not a valid state
-    not(state:check(NextState, CurrentColor)),
+    (
+        % State is check and should not be included
+        state:check(NextState, CurrentColor),
+        OtherStates = NextStates
+        ;
+        % State is not check and should be included
+        [NextState | OtherStates] = NextStates
+    ),
     
     % Recursive call
-    all_possible_states(CurrentState, Moves, NextStates), !.
-all_possible_states(CurrentState, [_ | Moves], NextStates) :-                   % Invalid pseudo-move
-    % Recursive call
-    all_possible_states(CurrentState, Moves, NextStates), !.
-all_possible_states(_, [], []) :- !.                                            % Base-Case
+    all_possible_states(CurrentState, Moves, OtherStates), !.
+all_possible_states(_, [], []) :- !.                             % Base case
 
 
 %! pieces/2(+State, -Pieces)
