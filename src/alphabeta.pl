@@ -6,16 +6,16 @@
 :- use_module("piece").
 
 
-%! alphabeta(+Player, +CurrentState, +Depth, +LowerBound, +UpperBound, -BestState, -BestScore)
+%! alphabeta(+Player, +CurrentState, +TraversedDepth, +MaxDepth, +LowerBound, +UpperBound, -BestState, -BestScore)
 %  
 %  Alpha/beta pruning to determin the next best move.
 %  Depth will specify the max recursion depth.
-alphabeta(Player, CurrentState, 0, _, _, CurrentState, BestScore) :-                    % Leaf: maximum depth is reached
+alphabeta(Player, CurrentState, MaxDepth, MaxDepth, _, _, CurrentState, BestScore) :-                       % Leaf: maximum depth is reached
    
     % Calculate the score for the current state
-    score(Player, CurrentState, BestScore), !.
+    score(Player, CurrentState, MaxDepth, MaxDepth, BestScore), !.
     
-alphabeta(Player, CurrentState, Depth, LowerBound, UpperBound, BestState, BestScore) :- % Continue building the game tree
+alphabeta(Player, CurrentState, TraversedDepth, MaxDepth, LowerBound, UpperBound, BestState, BestScore) :-  % Continue building the game tree
 
     % Determin all possible next states for the current state
     state:all_possible_states(CurrentState, NextStates),
@@ -24,71 +24,71 @@ alphabeta(Player, CurrentState, Depth, LowerBound, UpperBound, BestState, BestSc
     NextStates \= [],
 
     % Decrement the depth
-    NextDepth is Depth - 1,
+    NextTraversedDepth is TraversedDepth + 1,
 
     % Find the best possible move
-    best(Player, NextStates, NextDepth, LowerBound, UpperBound, BestState, BestScore), !.
+    best(Player, NextStates, NextTraversedDepth, MaxDepth, LowerBound, UpperBound, BestState, BestScore), !.
 
 % This branch will only be reached if the above 2 variants of the predicate fail.
 % This is only the case when all_possible_states is empty,
 % which is checkmate for the current player.
-alphabeta(Player, CurrentState, _, _, _, CurrentState, BestScore) :-                    % Leaf: a player is checkmate
+alphabeta(Player, CurrentState, TraversedDepth, MaxDepth, _, _, CurrentState, BestScore) :- % Leaf: a player is checkmate
     state:currentcolor(CurrentState, CheckmatePlayer),
 
     % Make sure the king is check (otherwise a stalemate is reached)
     state:check(CurrentState, CheckmatePlayer),
 
     % Calculate the score fot the current state.
-    score_checkmate(Player, CheckmatePlayer, BestScore), !.
+    score_checkmate(Player, CheckmatePlayer, TraversedDepth, MaxDepth, BestScore), !.
 
-alphabeta(Player, CurrentState, _, _, _, none, BestScore) :-                            % Leaf: a player is stalemate
+alphabeta(Player, CurrentState, _, _, _, _, none, BestScore) :-                             % Leaf: a player is stalemate
     state:currentcolor(CurrentState, StalematePlayer),
 
     % Calculate the score fot the current state.
     score_stalemate(Player, StalematePlayer, BestScore), !.
 
 
-%! best(+Player, +States, +Depth, +LowerBound, +UpperBound, -BestState, -BestScore)
+%! best(+Player, +States, +TraversedDepth, +MaxDepth, +LowerBound, +UpperBound, -BestState, -BestScore)
 %
 %  Best state in a given list of states.
-best(_, [], _, _, _, _, _) :- !.                                                                % Base case
+best(_, [], _, _, _, _, _, _) :- !.                                                                                % Base case
 
-best(Player, [State], Depth, LowerBound, UpperBound, State, Score) :-                           % Single state, return state
-
-    % Do minimax for the current state
-    alphabeta(Player, State, Depth, LowerBound, UpperBound, _, Score) , !.
-
-best(Player, [State | OtherStates], Depth, LowerBound, UpperBound, BestState, BestScore) :-     % Multiple states, determin best state
+best(Player, [State], TraversedDepth, MaxDepth, LowerBound, UpperBound, State, Score) :-                           % Single state, return state
 
     % Do minimax for the current state
-    alphabeta(Player, State, Depth, LowerBound, UpperBound, _, Score),
+    alphabeta(Player, State, TraversedDepth, MaxDepth, LowerBound, UpperBound, _, Score) , !.
+
+best(Player, [State | OtherStates], TraversedDepth, MaxDepth, LowerBound, UpperBound, BestState, BestScore) :-     % Multiple states, determin best state
+
+    % Do minimax for the current state
+    alphabeta(Player, State, TraversedDepth, MaxDepth, LowerBound, UpperBound, _, Score),
 
     % Cut or continue evaluation
-    cut(Player, State, Score, OtherStates, Depth, LowerBound, UpperBound, BestState, BestScore).
+    cut(Player, State, Score, OtherStates, TraversedDepth, MaxDepth, LowerBound, UpperBound, BestState, BestScore).
     
 
-%! cut(+Player, +State, +Score, +OtherStates, +Depth, +LowerBound, +UpperBound, -BestState, -BestScore)
+%! cut(+Player, +State, +Score, +OtherStates, +TraversedDepth, +MaxDepth, +LowerBound, +UpperBound, -BestState, -BestScore)
 %
 %  Cut of branches that will never lead to a result (Alpha/Beta-pruning)
-cut(Player, State, Score, _, _, _, UpperBound, State, Score) :-                                   % Maximizing player, cut-off
+cut(Player, State, Score, _, _, _, _, UpperBound, State, Score) :-                                                   % Maximizing player, cut-off
     max(State, Player),
 
     % Cut-off the branch if the score is larger than the upperbound
     Score >= UpperBound, !.
 
-cut(Player, State, Score, _, _, LowerBound, _, State, Score) :-                                   % Minimizing player, cut-off
+cut(Player, State, Score, _, _, _, LowerBound, _, State, Score) :-                                                   % Minimizing player, cut-off
     min(State, Player),
 
     % Cut-off the branch if the score is larger than the upperbound
     Score =< LowerBound, !.
 
-cut(Player, State1, Score1, OtherStates, Depth, LowerBound, UpperBound, BestState, BestScore) :-  % Continue evaluation
+cut(Player, State1, Score1, OtherStates, TraversedDepth, MaxDepth, LowerBound, UpperBound, BestState, BestScore) :-  % Continue evaluation
 
     % Update upper/lower bound
     update_bounds(Player, State1, Score1, LowerBound, UpperBound, NewLowerBound, NewUpperBound),
 
     % Continue evaluation of the other states
-    best(Player, OtherStates, Depth, NewLowerBound, NewUpperBound, State2, Score2),
+    best(Player, OtherStates, TraversedDepth, MaxDepth, NewLowerBound, NewUpperBound, State2, Score2),
 
     % Determin the best state of the 2 states
     best_of(Player, State1, State2, Score1, Score2, BestState, BestScore), !.
@@ -186,7 +186,7 @@ min(State, Player) :-
     CurrentPlayer == Player.
 
 
-%! score(+Player, +State, -Score)
+%! score(+Player, +State, +TraversedDepth, +MaxDepth, -Score)
 %
 %  Score for a given state.
 %
@@ -201,15 +201,15 @@ min(State, Player) :-
 %  => If the player has a higher score, the overal score will be positive
 %  => If the opponent has a higher score, the overal score will be negative
 
-score(Player, State, Score) :- % Checkmate or stalemate
+score(Player, State, TraversedDepth, MaxDepth, Score) :- % Checkmate or stalemate
 
     % Make sure the player cannot do any more moves
     state:all_possible_states(State, []),
 
     % Checkmate or stalemate
-    score_checkmate_or_stalemate(Player, State, Score).
+    score_checkmate_or_stalemate(Player, State, TraversedDepth, MaxDepth, Score).
 
-score(Player, State, Score) :- % Symmetric evaluation scoring function
+score(Player, State, _, _, Score) :-                     % Symmetric evaluation scoring function
 
     % Score for the player
     score_player(Player, State, PlayerScore),
@@ -220,7 +220,6 @@ score(Player, State, Score) :- % Symmetric evaluation scoring function
 
     % Calculate the state score
     Score is PlayerScore - OpponentScore.
-
 
 %! score_player(+Player, +State, -Score)
 %
@@ -236,32 +235,41 @@ score_player(Player, State, Score) :-
     Score = PiecesScore.
 
 
-%! score_checkmate_or_stalemate(+Player, +State, -Score)
+%! score_checkmate_or_stalemate(+Player, +State, +TraversedDepth, +MaxDepth, -Score)
 %
 %  Score when a given player is either checkmate or stalemate.
 %  If the player is checkmate, return the checkmate score.
 %  If the player is stalemate, return the stalemate score.
-score_checkmate_or_stalemate(Player, State, Score) :-   % Checkmate
+score_checkmate_or_stalemate(Player, State, TraversedDepth, MaxDepth, Score) :-   % Checkmate
     state:currentcolor(State, CurrentPlayer),
 
     % Make sure the king is check (otherwise a stalemate is reached)
     state:check(State, CurrentPlayer),
 
     % Checkmate score
-    score_checkmate(Player, CurrentPlayer, Score).
+    score_checkmate(Player, CurrentPlayer, TraversedDepth, MaxDepth, Score).
 
-score_checkmate_or_stalemate(Player, State, Score) :-   % Stalemate
+score_checkmate_or_stalemate(Player, State, _, _, Score) :-                       % Stalemate
     state:currentcolor(State, CurrentPlayer),
 
     % Checkmate score
     score_stalemate(Player, CurrentPlayer, Score).
 
 
-%! score_checkmate(+Player, +CheckmatePlayer, -Score)
+%! score_checkmate(+Player, +CheckmatePlayer, +TraversedDepth, +MaxDepth, -Score)
 %
 %  Score when a given state is checkmate.
-score_checkmate(Player, Player, -10000) :- !.
-score_checkmate(_, _, 10000) :- !.
+score_checkmate(Player, CheckmatePlayer, TraversedDepth, MaxDepth, Score) :-
+    (
+        Player == CheckmatePlayer, PartialScore = -10000
+        ;
+        PartialScore = 1000
+    ),
+
+    % Apply a depth penalty to the checkmate.
+    % This will make sure the chosen nextmove will be based on the branch with the quickest possible checkmate.
+    ScorePenalty is MaxDepth - TraversedDepth, % This value will become smaller when the traversed depth will increase
+    Score is PartialScore + ScorePenalty.
 
 
 %! score_stalemate(+Player, +StalematePlayer, -Score)
