@@ -10,7 +10,7 @@ benchmark_state(State) :-
     statistics(walltime, [_ | [_]]),
 
     % Benchmark
-    alphabeta:alphabeta(black, State, 4, -100000, 100000, _, BestScore),
+    alphabeta:alphabeta(black, State, 0, 4, -100000, 100000, _, BestScore),
 
     % Stop timer
     statistics(walltime, [_ | [ExecutionTime]]),
