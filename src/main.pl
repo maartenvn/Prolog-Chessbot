@@ -12,7 +12,7 @@ main :-
     handle_main(Args),
     halt(0).
 
-handle_main([_]) :- % Test Mode TODO: this must parse "TEST"
+handle_main([_]) :- % Test Mode
 
     % Load the data from the stdin stream and parse it.
     phrase_from_stream(parser:parse_state(State), current_input),
