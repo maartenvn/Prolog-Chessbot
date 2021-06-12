@@ -8,11 +8,6 @@
 :- set_prolog_flag(double_quotes, codes).
 
 
-test :-
-    phrase_from_file(parse_state(State), "boards/checkmate.txt", [encoding(utf8),type(text)]),
-    write(State).
-
-
 %! parse_state(-State, StartColor)
 %
 %  Parse a chess game state.
