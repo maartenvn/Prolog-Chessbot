@@ -263,7 +263,7 @@ score_checkmate(Player, CheckmatePlayer, TraversedDepth, MaxDepth, Score) :-
     (
         Player == CheckmatePlayer, PartialScore = -10000
         ;
-        PartialScore = 1000
+        PartialScore = 10000
     ),
 
     % Apply a depth penalty to the checkmate.
