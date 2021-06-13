@@ -1,3 +1,0 @@
--   Use memberchk instead of member
--   New board layout
--   Strange thing; :- table is faster than hardcoding the value
