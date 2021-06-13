@@ -145,8 +145,8 @@ test(possible_moves__horse, [nondet]) :-
     utils:list_equals(ExpectedMoves, ReceivedMoves).
 
 
-% possible_moves/3: for pawn, forward & en-passant
-test(possible_moves__pawn_forward_passant, [nondet]) :-
+% possible_moves/3: for white pawn, forward & en-passant
+test(possible_moves__pawn_white_forward_passant, [nondet]) :-
     Pawn = piece(white, pawn, 3/2),
     state:create_state([Pawn], white, [], none, State),
 
@@ -163,8 +163,8 @@ test(possible_moves__pawn_forward_passant, [nondet]) :-
     utils:list_equals(ExpectedMoves, ReceivedMoves).
 
 
-% possible_moves/3: for pawn, forward
-test(possible_moves__pawn_forward, [nondet]) :-
+% possible_moves/3: for white pawn, forward
+test(possible_moves__pawn_white_forward, [nondet]) :-
     Pawn = piece(black, pawn, 3/3),
     state:create_state([Pawn], black, [], none, State),
 
@@ -180,8 +180,8 @@ test(possible_moves__pawn_forward, [nondet]) :-
     utils:list_equals(ExpectedMoves, ReceivedMoves).
 
 
-% possible_moves/3: for pawn, diagonal
-test(possible_moves__pawn_diagonal, [nondet]) :-
+% possible_moves/3: for white pawn, diagonal
+test(possible_moves__pawn_white_diagonal, [nondet]) :-
     Pawn = piece(white, pawn, 3/3),
     OpponentLeft = piece(black, pawn, 2/4),
     OpponentRight = piece(black, pawn, 4/4),
@@ -200,8 +200,8 @@ test(possible_moves__pawn_diagonal, [nondet]) :-
     % Assert
     utils:list_equals(ExpectedMoves, ReceivedMoves).
 
-% possible_moves/3: for pawn, promition, with attack possible or just forward
-test(possible_moves__pawn_promition, [nondet]) :-
+% possible_moves/3: for white pawn, promition, with attack possible or just forward
+test(possible_moves__pawn_white_promition, [nondet]) :-
     Pawn = piece(white, pawn, 2/7),
     OpponentLeft = piece(black, pawn, 1/8),
     OpponentRight = piece(black, pawn, 3/8),
@@ -221,6 +221,91 @@ test(possible_moves__pawn_promition, [nondet]) :-
         move([Pawn, OpponenRight], [piece(white, horse, 3/8)]), 
         move([Pawn, OpponenRight], [piece(white, tower, 3/8)]), 
         move([Pawn, OpponenRight], [piece(white, bishop, 3/8)])
+    ],
+
+    % Received moves
+    move:possible_moves(Pawn, State, ReceivedMoves),
+    
+    % Assert
+    utils:list_equals(ExpectedMoves, ReceivedMoves).
+
+
+% possible_moves/3: for black pawn, forward & en-passant
+test(possible_moves__pawn_black_forward_passant, [nondet]) :-
+    Pawn = piece(black, pawn, 5/7),
+    state:create_state([Pawn], black, [], none, State),
+
+    % Expected moves
+    ExpectedMoves = [
+        move([Pawn], [piece(black, pawn, 5/6)]), 
+        move([Pawn], [piece(black, pawn, 5/5)])
+    ],
+
+    % Received moves
+    move:possible_moves(Pawn, State, ReceivedMoves),
+
+    % Assert
+    utils:list_equals(ExpectedMoves, ReceivedMoves).
+
+
+% possible_moves/3: for black pawn, forward
+test(possible_moves__pawn_black_forward, [nondet]) :-
+    Pawn = piece(black, pawn, 3/3),
+    state:create_state([Pawn], black, [], none, State),
+
+    % Expected moves
+    ExpectedMoves = [
+        move([Pawn], [piece(black, pawn, 3/2)])
+    ],
+
+    % Received moves
+    move:possible_moves(Pawn, State, ReceivedMoves),
+
+    % Assert
+    utils:list_equals(ExpectedMoves, ReceivedMoves).
+
+
+% possible_moves/3: for black pawn, diagonal
+test(possible_moves__pawn_black_diagonal, [nondet]) :-
+    Pawn = piece(black, pawn, 6/3),
+    OpponentLeft = piece(white, pawn, 5/2),
+    OpponentRight = piece(white, pawn, 7/2),
+    state:create_state([Pawn, OpponentLeft, OpponentRight], black, [], none, State),
+
+    % Expected moves
+    ExpectedMoves = [
+        move([Pawn], [piece(black, pawn, 6/2)]),
+        move([Pawn, OpponentLeft], [piece(black, pawn, 5/2)]),
+        move([Pawn, OpponentRight], [piece(black, pawn, 7/2)])
+    ],
+
+    % Received moves
+    move:possible_moves(Pawn, State, ReceivedMoves),
+
+    % Assert
+    utils:list_equals(ExpectedMoves, ReceivedMoves).
+
+% possible_moves/3: for black pawn, promition, with attack possible or just forward
+test(possible_moves__pawn_black_promition, [nondet]) :-
+    Pawn = piece(black, pawn, 3/2),
+    OpponentLeft = piece(white, pawn, 2/1),
+    OpponentRight = piece(white, pawn, 4/1),
+    state:create_state([Pawn, OpponentLeft, OpponentRight], black, [], none, State),
+
+    % Expected moves
+    ExpectedMoves = [
+        move([Pawn], [piece(black, queen, 3/1)]), 
+        move([Pawn], [piece(black, horse, 3/1)]), 
+        move([Pawn], [piece(black, tower, 3/1)]), 
+        move([Pawn], [piece(black, bishop, 3/1)]), 
+        move([Pawn, OpponenLeft], [piece(black, queen, 2/1)]), 
+        move([Pawn, OpponenLeft], [piece(black, horse, 2/1)]), 
+        move([Pawn, OpponenLeft], [piece(black, tower, 2/1)]), 
+        move([Pawn, OpponenLeft], [piece(black, bishop, 2/1)]), 
+        move([Pawn, OpponenRight], [piece(black, queen, 4/1)]), 
+        move([Pawn, OpponenRight], [piece(black, horse, 4/1)]), 
+        move([Pawn, OpponenRight], [piece(black, tower, 4/1)]), 
+        move([Pawn, OpponenRight], [piece(black, bishop, 4/1)])
     ],
 
     % Received moves
