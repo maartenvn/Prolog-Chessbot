@@ -41,8 +41,8 @@ new_passant(Move, NewPassant) :-
 
     % Find the en-passant possibility
     position:pawn_start_position(OldPosition, Color),
-    piece:passant_piece(piece(Color, pawn, NewPosition), NewPassant).
-new_passant(_, none).
+    piece:passant_piece(piece(Color, pawn, NewPosition), NewPassant), !.
+new_passant(_, none) :- !.
 
 
 %! do_move(+Move, +CurrentState, -NewState)
@@ -106,7 +106,7 @@ all_possible_moves_for_pieces([Piece | Pieces], State, Moves) :-
 
     % Merge the moves into the moves list
     append(PieceMoves, RestMoves, Moves), !.
-all_possible_moves_for_pieces([], _, []).
+all_possible_moves_for_pieces([], _, []) :- !.
 
 
 %! possible_moves(+Piece, +State, -Moves)
@@ -257,7 +257,8 @@ pawn_forward_moves(Piece, State, [Move1]) :-        % Pawn (can move max 1 step 
     create_move(CurrentPosition, NewPosition1, State, Move1), !.
 
 pawn_forward_moves(Piece, _, []) :-             % Pawn cannot move forward
-    piece:type(Piece, pawn).                          
+    piece:type(Piece, pawn),
+    !.                          
 
 %! pawn_diagonal_moves(+Piece, +State, -Moves)
 %
@@ -296,7 +297,7 @@ pawn_diagonal_moves_part(Piece, State, XDifference, [Move]) :- % Left diagonal
     create_move(X/Y, XNew/YNew, State, Move), !.
 
 pawn_diagonal_moves_part(Piece, _, _, []) :-
-    piece:type(Piece, pawn).  
+    piece:type(Piece, pawn), !.  
 
 
 %! pawn_passant_moves(+Piece, +State, -Moves)
@@ -320,7 +321,7 @@ pawn_passant_moves(Piece, State, Moves) :-
     append([LeftMoves, RightMoves], Moves), !.
 
 pawn_passant_moves(Piece, _, []) :-     
-    piece:type(Piece, pawn).  
+    piece:type(Piece, pawn), !.  
 
 
 %! pawn_passant_moves_part(+Piece, +Passant, +XDifference, -Moves)
@@ -350,7 +351,7 @@ pawn_passant_moves_part(Piece, State, XDifference, [Move]) :-
     Move = move([Piece, OpponentPiece], [piece(PieceColor, pawn, XNew/YNew)]), !.
 
 pawn_passant_moves_part(Piece, _, _, []) :- 
-    piece:type(Piece, pawn).
+    piece:type(Piece, pawn), !.
 
 
 %! rokades_move(+King, +State, -Moves)
@@ -474,6 +475,7 @@ path_moves(StartPiece, X/Y, State, XDirection, YDirection, [Move | Moves]) :-
 
     % Recursivly extend the diagonal
     path_moves(StartPiece, XNew/YNew, State, XDirection, YDirection, Moves).
+
 path_moves(StartPiece, X/Y, State, XDirection, YDirection, [Move]) :-
     piece:color(StartPiece, Color),
     
@@ -489,7 +491,8 @@ path_moves(StartPiece, X/Y, State, XDirection, YDirection, [Move]) :-
 
     % New position must be taken by the opponent
     position:opponent_position(XNew/YNew, Color, State), !.
-path_moves(_, _, _, _, _, []).
+
+path_moves(_, _, _, _, _, []) :- !.
 
 %! positions_to_moves(+Piece, +Stat, +Positions, -Moves)
 %
@@ -501,7 +504,7 @@ positions_to_moves(Piece, State, [NextPosition | NextPositions], [Move | Moves])
     
     % Recursive Call
     positions_to_moves(Piece, State, NextPositions, Moves), !.
-positions_to_moves(_, _, [], []).
+positions_to_moves(_, _, [], []) :- !.
 
 
 %! create_move/4(+CurrentPosition, +NewPosition, +State, -Move)
@@ -526,7 +529,8 @@ create_piece_move(CurrentPiece, NewPosition, State, Move) :-  % Opponent on new 
     NewPiece = piece(Color, Type, NewPosition),
 
     % Unify the move
-    Move = move([CurrentPiece, OpponentPiece], [NewPiece]).
+    Move = move([CurrentPiece, OpponentPiece], [NewPiece]), !.
+
 create_piece_move(CurrentPiece, NewPosition, State, Move) :-  % No piece on new position
     piece:color(CurrentPiece, Color),
     piece:type(CurrentPiece, Type),
@@ -538,6 +542,6 @@ create_piece_move(CurrentPiece, NewPosition, State, Move) :-  % No piece on new 
     NewPiece = piece(Color, Type, NewPosition),
 
     % Unify the move
-    Move = move([CurrentPiece], [NewPiece]).
+    Move = move([CurrentPiece], [NewPiece]), !.
 
 
