@@ -34,6 +34,7 @@ write_state(State) :-
 %! write_states(+States)
 %
 %  Write a given list of states to stdout.
+write_states([]).
 write_states([State]) :-
     
     % Write the board to stdout
@@ -46,7 +47,6 @@ write_states([State | States]) :-
 
     % Recursive call
     write_states(States), !.
-write_states([]) :- !.
 
 
 %! write_draw()
@@ -101,7 +101,7 @@ extract_rows(Y, Pieces, [Row | Rows]) :-
 
     % Recursive call
     extract_rows(YNext, Pieces, Rows), !.
-extract_rows(_, _, []) :- !.
+extract_rows(_, _, []).
 
 
 %! extract_rokades(+Rokades, +RokadesList)
@@ -124,14 +124,7 @@ extract_rokades_color(Color, [Rokade | Rokades], [ColorRokade | ColorRokades]) :
 
     % Recursive call
     extract_rokades_color(Color, Rokades, ColorRokades), !.
-
-extract_rokades_color(Color, [Rokade | Rokades], ColorRokades) :- % No match
-    Rokade = rokade(RokadeColor, _),
-
-    % Color must not match
-    Color \== RokadeColor,
-
+extract_rokades_color(Color, [_ | Rokades], ColorRokades) :-                 % No match
     % Recursive call
     extract_rokades_color(Color, Rokades, ColorRokades), !.
-
-extract_rokades_color(_, [], []) :- !.
+extract_rokades_color(_, [], []).
