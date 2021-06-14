@@ -1,3 +1,0 @@
-Amount of moves: 36; Average move time: 752.11ms; End game status: You won 
-Amount of moves: 30; Average move time: 2.52s; End game status: You won 
-Amount of moves: 16; Average move time: 1173.44ms; End game status: You won 
