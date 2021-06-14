@@ -167,8 +167,31 @@ color_pieces(State, Color, [_ | Positions], ColorPieces) :-                     
     color_pieces(State, Color, Positions, ColorPieces), !.
 color_pieces(_, _, [], []).                                                      % Base case
 
+%! king/3(+State, +Color, -King).
+% 
+%  Get the king piece for a given color
+king(State, Color, King) :-
+    % Find all possible positions on the board
+    position:valid_positions(Positions),
 
-%! piece_at_position(+State, +X/+Y, -Piece).
+    % Helper predicate
+    king(Positions, State, Color, King).
+
+%! king/4(+Positions, +State, +Color, -King).
+% 
+%  Helper predicate for king/3
+king([Position | _], State, Color, King) :-
+    % King Piece
+    King = piece(Color, king, _),
+
+    % Piece at the current position is the king
+    piece_at_position(State, Position, King).
+king([_ | Positions], State, Color, King) :-
+    % Recursive call
+    king(Positions, State, Color, King).
+
+
+%! piece_at_position(+State, +X/+Y, -Piece)
 %
 %  Piece at a given position in a given state.
 piece_at_position(State, X/Y, Piece) :-
@@ -320,13 +343,9 @@ set_color(State, Color, NewState) :-
 % If the king of the given color in-check for the given state.
 % The king is now in range of attack by the opponent player.
 check(State, Color) :-
-    pieces(State, Pieces),
-
-    % King Piece
-    KingPiece = piece(Color, king, _),
 
     % Retrieve the king from the board
-    selectchk(KingPiece, Pieces, _), !,
+    king(State, Color, KingPiece), !,
 
     % Check if any opponent piece can attack the king of the given color
     can_be_attacked(KingPiece, State).
