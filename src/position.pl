@@ -125,7 +125,12 @@ empty_position(X/Y, State) :-
 %
 %  Check if a given position is taken by a piece of the opponent player.
 opponent_position(X/Y, Color, State) :-
-    opponent_position(X/Y, Color, State, _).
+    
+    % Opponent color
+    piece:opponent(Color, OpponentColor),
+
+    % Piece at the given position must be of the opponents color
+    state:piece_at_position(State, X/Y, piece(OpponentColor, _, _)).
 
 
 %! opponent_position/4(+X/+Y, +Color, +State, -OpponentPiece)
