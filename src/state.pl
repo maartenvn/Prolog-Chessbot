@@ -101,7 +101,7 @@ all_possible_states(CurrentState, [Move | Moves], NextStates) :-  % Valid pseudo
     ),
     
     % Recursive call
-    all_possible_states(CurrentState, Moves, OtherStates).
+    all_possible_states(CurrentState, Moves, OtherStates), !.
 all_possible_states(_, [], []).                                   % Base case
 
 
@@ -134,7 +134,7 @@ pieces(State, [Position | Positions], [Piece | Pieces]) :- % Piece at current po
 pieces(State, [_ | Positions], Pieces) :-                  % Piece at current position is "none"
 
     % Recursive call
-    pieces(State, Positions, Pieces).
+    pieces(State, Positions, Pieces), !.
 
 pieces(_, [], []).                                         % Base case
 
@@ -167,7 +167,7 @@ color_pieces(State, Color, [Position | Positions], [ColorPiece | ColorPieces]) :
 color_pieces(State, Color, [_ | Positions], ColorPieces) :-                      % Piece at current position is "none" or not of the given color
     
     % Recursive call
-    color_pieces(State, Color, Positions, ColorPieces).
+    color_pieces(State, Color, Positions, ColorPieces), !.
 
 color_pieces(_, _, [], []).                                                      % Base case
 
@@ -227,7 +227,7 @@ set_pieces(State, [Piece | Pieces], NewState) :-
     set_piece(State, Piece, PartialState),
     
     % Recursive call
-    set_pieces(PartialState, Pieces, NewState).
+    set_pieces(PartialState, Pieces, NewState), !.
 set_pieces(State, [], State).
 
 
@@ -250,7 +250,7 @@ remove_pieces(State, [Piece | Pieces], NewState) :-
     remove_piece(State, Piece, PartialState),
 
     % Recursive call
-    remove_pieces(PartialState, Pieces, NewState).
+    remove_pieces(PartialState, Pieces, NewState), !.
 remove_pieces(State, [], State).
 
 
@@ -279,7 +279,7 @@ remove_rokades(State, [Rokade | Rokades], NewState) :-
     remove_rokade(State, Rokade, PartialState),
 
     % Recursive call
-    remove_rokades(PartialState, Rokades, NewState).
+    remove_rokades(PartialState, Rokades, NewState), !.
 remove_rokades(State, [], State).
 
 
@@ -364,4 +364,4 @@ can_be_attacked_for_moves(Piece, [Move | _]) :-  % Can be attacked
 can_be_attacked_for_moves(Piece, [_ | Moves]) :- % Cannot be attacked
     
     % Recursive call
-    can_be_attacked_for_moves(Piece, Moves).
+    can_be_attacked_for_moves(Piece, Moves), !.

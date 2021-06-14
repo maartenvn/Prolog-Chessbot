@@ -13,7 +13,7 @@
 alphabeta(Player, CurrentState, MaxDepth, MaxDepth, _, _, CurrentState, BestScore) :-                       % Leaf: maximum depth is reached
    
     % Calculate the score for the current state
-    score(Player, CurrentState, MaxDepth, MaxDepth, BestScore).
+    score(Player, CurrentState, MaxDepth, MaxDepth, BestScore), !.
     
 alphabeta(Player, CurrentState, TraversedDepth, MaxDepth, LowerBound, UpperBound, BestState, BestScore) :-  % Continue building the game tree
 
@@ -39,13 +39,13 @@ alphabeta(Player, CurrentState, TraversedDepth, MaxDepth, _, _, CurrentState, Be
     state:check(CurrentState, CheckmatePlayer),
 
     % Calculate the score fot the current state.
-    score_checkmate(Player, CheckmatePlayer, TraversedDepth, MaxDepth, BestScore).
+    score_checkmate(Player, CheckmatePlayer, TraversedDepth, MaxDepth, BestScore), !.
 
 alphabeta(Player, CurrentState, _, _, _, _, none, BestScore) :-                             % Leaf: a player is stalemate
     state:currentcolor(CurrentState, StalematePlayer),
 
     % Calculate the score fot the current state.
-    score_stalemate(Player, StalematePlayer, BestScore).
+    score_stalemate(Player, StalematePlayer, BestScore), !.
 
 
 %! best(+Player, +States, +TraversedDepth, +MaxDepth, +LowerBound, +UpperBound, -BestState, -BestScore)
@@ -64,7 +64,7 @@ best(Player, [State | OtherStates], TraversedDepth, MaxDepth, LowerBound, UpperB
     alphabeta(Player, State, TraversedDepth, MaxDepth, LowerBound, UpperBound, _, Score),
 
     % Cut or continue evaluation
-    cut(Player, State, Score, OtherStates, TraversedDepth, MaxDepth, LowerBound, UpperBound, BestState, BestScore).
+    cut(Player, State, Score, OtherStates, TraversedDepth, MaxDepth, LowerBound, UpperBound, BestState, BestScore), !.
     
 
 %! cut(+Player, +State, +Score, +OtherStates, +TraversedDepth, +MaxDepth, +LowerBound, +UpperBound, -BestState, -BestScore)
@@ -74,13 +74,13 @@ cut(Player, State, Score, _, _, _, _, UpperBound, State, Score) :-              
     max(State, Player),
 
     % Cut-off the branch if the score is larger than the upperbound
-    Score >= UpperBound.
+    Score >= UpperBound, !.
 
 cut(Player, State, Score, _, _, _, LowerBound, _, State, Score) :-                                                   % Minimizing player, cut-off
     min(State, Player),
 
     % Cut-off the branch if the score is larger than the upperbound
-    Score =< LowerBound.
+    Score =< LowerBound, !.
 
 cut(Player, State1, Score1, OtherStates, TraversedDepth, MaxDepth, LowerBound, UpperBound, BestState, BestScore) :-  % Continue evaluation
 
@@ -91,7 +91,7 @@ cut(Player, State1, Score1, OtherStates, TraversedDepth, MaxDepth, LowerBound, U
     best(Player, OtherStates, TraversedDepth, MaxDepth, NewLowerBound, NewUpperBound, State2, Score2),
 
     % Determin the best state of the 2 states
-    best_of(Player, State1, State2, Score1, Score2, BestState, BestScore).
+    best_of(Player, State1, State2, Score1, Score2, BestState, BestScore), !.
 
 
 %! update_bounds(+Player, +State, +Score, +LowerBound, +UpperBound, -NewLowerBound, -NewUpperBound)
@@ -287,7 +287,7 @@ score_pieces([Piece | Pieces], Score) :-
     score_pieces(Pieces, PiecesScore),
 
     % Add the scores together
-    Score is PieceScore + PiecesScore.
+    Score is PieceScore + PiecesScore, !.
 score_pieces([], 0).
 
 

@@ -63,7 +63,7 @@ row_pieces(Y, [Piece | Pieces], RowPieces) :- % No match
     position(Piece, _),
 
     % Recursive call
-    row_pieces(Y, Pieces, RowPieces).
+    row_pieces(Y, Pieces, RowPieces), !.
 
 row_pieces(_, [], []).
 
@@ -98,7 +98,7 @@ sorted_pieces(Pieces, X, SortedPieces) :-
 
     % Recursive call
     XNext is X + 1,
-    sorted_pieces(Pieces, XNext, SortedPieces).
+    sorted_pieces(Pieces, XNext, SortedPieces), !.
 sorted_pieces(_, _, []).
 
 

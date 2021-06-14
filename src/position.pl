@@ -174,4 +174,4 @@ empty_between_positions(X1/Y, X2/Y, State) :-      % Recursion Case
     empty_position(XPos/Y, State),
 
     % Recursive call
-    empty_between_positions(XPos/Y, X2/Y, State).
+    empty_between_positions(XPos/Y, X2/Y, State), !.

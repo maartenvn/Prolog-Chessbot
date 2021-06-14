@@ -45,7 +45,7 @@ write_states([State | States]) :-
     write("\n~\n"),
 
     % Recursive call
-    write_states(States).
+    write_states(States), !.
 write_states([]).
 
 
@@ -100,7 +100,7 @@ extract_rows(Y, Pieces, [Row | Rows]) :-
     YNext is Y - 1,
 
     % Recursive call
-    extract_rows(YNext, Pieces, Rows).
+    extract_rows(YNext, Pieces, Rows), !.
 extract_rows(_, _, []).
 
 
@@ -127,6 +127,6 @@ extract_rokades_color(Color, [Rokade | Rokades], [ColorRokade | ColorRokades]) :
 
 extract_rokades_color(Color, [_ | Rokades], ColorRokades) :- % No match
     % Recursive call
-    extract_rokades_color(Color, Rokades, ColorRokades).
+    extract_rokades_color(Color, Rokades, ColorRokades), !.
 
 extract_rokades_color(_, [], []).

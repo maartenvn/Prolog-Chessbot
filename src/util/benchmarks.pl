@@ -10,7 +10,7 @@ benchmark_state(State) :-
     statistics(walltime, [_ | [_]]),
 
     % Benchmark
-    alphabeta:alphabeta(black, State, 0, 4, -100000, 100000, _, BestScore),
+    alphabeta:alphabeta(black, State, 0, 3, -100000, 100000, _, BestScore),
 
     % Stop timer
     statistics(walltime, [_ | [ExecutionTime]]),
@@ -20,5 +20,5 @@ benchmark_state(State) :-
     write("Execution took: "), write(ExecutionTime), write(" ms."), nl.
 
 benchmark :-
-    state:create_state([piece(black,tower,1/8),piece(black,horse,2/8),piece(black,bishop,3/8),piece(black,queen,4/8),piece(black,king,5/8),piece(black,bishop,6/8),piece(black,horse,7/8),piece(black,tower,8/8),piece(black,pawn,1/7),piece(black,pawn,2/7),piece(black,pawn,3/7),piece(black,pawn,4/7),piece(black,pawn,5/7),piece(black,pawn,6/7),piece(black,pawn,7/7),piece(black,pawn,8/7),piece(white,pawn,6/3),piece(white,pawn,1/2),piece(white,pawn,2/2),piece(white,pawn,3/2),piece(white,pawn,4/2),piece(white,pawn,5/2),piece(white,pawn,7/2),piece(white,pawn,8/2),piece(white,tower,1/1),piece(white,horse,2/1),piece(white,bishop,3/1),piece(white,queen,4/1),piece(white,king,5/1),piece(white,bishop,6/1),piece(white,horse,7/1),piece(white,tower,8/1)], black, [rokade(black,long),rokade(black,short),rokade(white,long),rokade(white,short)],none, State),
+    State = state(rows(row(none,none,none,piece(white,horse,4/1),none,piece(black,horse,6/1),none,none),row(none,piece(black,tower,2/2),none,piece(black,queen,4/2),none,none,piece(white,pawn,7/2),none),row(none,none,piece(white,bishop,3/3),piece(black,pawn,4/3),none,none,none,none),row(piece(black,king,1/4),none,none,none,none,none,none,none),row(piece(white,pawn,1/5),none,none,none,none,none,piece(black,horse,7/5),none),row(piece(white,pawn,1/6),none,none,none,none,none,none,none),row(none,none,none,piece(black,pawn,4/7),piece(white,king,5/7),none,none,none),row(piece(white,queen,1/8),piece(white,horse,2/8),none,none,piece(black,bishop,5/8),none,none,none)),white,[],none),
     benchmark_state(State).

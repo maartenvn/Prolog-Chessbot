@@ -105,7 +105,7 @@ all_possible_moves_for_pieces([Piece | Pieces], State, Moves) :-
     all_possible_moves_for_pieces(Pieces, State, RestMoves),
 
     % Merge the moves into the moves list
-    append(PieceMoves, RestMoves, Moves).
+    append(PieceMoves, RestMoves, Moves), !.
 all_possible_moves_for_pieces([], _, []).
 
 
@@ -125,7 +125,7 @@ possible_moves(Piece, State, Moves) :-
     square_moves(Piece, State, SquareMoves),
     
     % Merge possible moves
-    append([RokadesMoves, SquareMoves], Moves).
+    append([RokadesMoves, SquareMoves], Moves), !.
 
 % Queen
 possible_moves(Piece, State, Moves) :-
@@ -136,7 +136,7 @@ possible_moves(Piece, State, Moves) :-
     diagonal_moves(Piece, State, DiagonalMoves),
 
     % Merge possible moves
-    append([CrossMoves, DiagonalMoves], Moves).
+    append([CrossMoves, DiagonalMoves], Moves), !.
 
 % Tower
 possible_moves(Piece, State, Moves) :-
@@ -150,7 +150,7 @@ possible_moves(Piece, State, Moves) :-
     piece:type(Piece, bishop),
 
     % Bishop can move in diagonally.
-    diagonal_moves(Piece, State, Moves).
+    diagonal_moves(Piece, State, Moves), !.
 
 % Horse
 possible_moves(Piece, State, Moves) :-
@@ -160,7 +160,7 @@ possible_moves(Piece, State, Moves) :-
    findall(Position, position:horse_position(Piece, State, Position), Positions),
 
    % Convert positions into moves
-   positions_to_moves(Piece, State, Positions, Moves).
+   positions_to_moves(Piece, State, Positions, Moves), !.
 
 % Pawn
 possible_moves(Piece, State, Moves) :-
@@ -175,7 +175,7 @@ possible_moves(Piece, State, Moves) :-
     append([ForwardMoves, DiagonalMoves, PassantMoves], MergedMoves),
     
     % Handle potential pawn promotional moves
-    convert_promotion_moves(Piece, MergedMoves, Moves).
+    convert_promotion_moves(Piece, MergedMoves, Moves), !.
 
 
 %! convert_promotion_moves(+Piece, +Moves, +PromotionMoves)
@@ -204,7 +204,7 @@ convert_promotion_moves(Piece, [Move | Moves], PromotionMoves) :-    % Current m
     ],
 
     % Merge
-    append([PromotionMovesCurrent, PromotionMovesRest], PromotionMoves).
+    append([PromotionMovesCurrent, PromotionMovesRest], PromotionMoves), !.
 
 convert_promotion_moves(Piece, [Move | Moves], [PromotionMove | PromotionMoves]) :-    % Current move is not a promotion move
 
@@ -213,7 +213,7 @@ convert_promotion_moves(Piece, [Move | Moves], [PromotionMove | PromotionMoves])
     PromotionMove = Move,
     
     % Recursive call
-    convert_promotion_moves(Piece, Moves, PromotionMoves).
+    convert_promotion_moves(Piece, Moves, PromotionMoves), !.
 
 convert_promotion_moves(_, [], []). % Base Case
 
@@ -502,7 +502,7 @@ positions_to_moves(Piece, State, [NextPosition | NextPositions], [Move | Moves])
     create_piece_move(Piece, NextPosition, State, Move),
     
     % Recursive Call
-    positions_to_moves(Piece, State, NextPositions, Moves).
+    positions_to_moves(Piece, State, NextPositions, Moves), !.
 positions_to_moves(_, _, [], []).
 
 

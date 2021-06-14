@@ -37,7 +37,7 @@ parse_rows(8, [Pieces | PiecesRest], [Rokades | RokadesRest], Passant, StartColo
     parse_border_row(8, black, Pieces, Rokades, Passant, StartColor),
 
     % Recursive call
-    parse_rows(7, PiecesRest, RokadesRest, Passant, StartColor).
+    parse_rows(7, PiecesRest, RokadesRest, Passant, StartColor), !.
 
 parse_rows(1, [Pieces], [Rokades], Passant, StartColor) --> % First row
     % Parse the row
@@ -52,7 +52,7 @@ parse_rows(Y, [Pieces | PiecesRest], Rokades, Passant, StartColor) --> % Rows in
     parse_row(Y, Pieces),
     
     % Recursive call
-    parse_rows(YNext, PiecesRest, Rokades, Passant, StartColor).
+    parse_rows(YNext, PiecesRest, Rokades, Passant, StartColor), !.
 
 
 %! parse_row(-Y, -Pieces)
