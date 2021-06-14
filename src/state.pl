@@ -360,25 +360,38 @@ can_be_attacked(Piece, State) :-
     % Opponent Color
     piece:opponent(Color, OpponentColor),
 
-    % All possible moves by the opponent
-    move:all_possible_moves(OpponentColor, State, Moves),
+    % Opponent Pieces
+    state:color_pieces(State, OpponentColor, OpponentPieces),
 
     % Helper predicate
-    can_be_attacked_for_moves(Piece, Moves).
+    can_be_attacked_by_pieces(Piece, State, OpponentPieces).
 
+%! can_be_attacked_by_pieces(+Piece, +State, +OpponentPieces)
+%
+%  If a given piece can be attacked by a list of opponent pieces.
+can_be_attacked_by_pieces(Piece, State, [OpponentPiece | _]) :-              % Can be attacked by moves of current piece
 
-%! can_be_attacked_for_moves(+Piece, +Moves)
+    % Possible moves
+    move:possible_moves(OpponentPiece, State, OpponentMoves),
+
+    % Piece can be attacked by received list of moves
+    can_be_attacked_by_moves(Piece, OpponentMoves).
+can_be_attacked_by_pieces(Piece, State, [_ | OpponentPieces]) :- % Cannot be attacked by moves of current piece
+    % Recursive call
+    can_be_attacked_by_pieces(Piece, State, OpponentPieces).
+
+%! can_be_attacked_by_moves(+Piece, +Moves)
 %
 %  If a given piece can be attacked in a given list of moves.
-can_be_attacked_for_moves(Piece, [Move | _]) :-  % Can be attacked
+can_be_attacked_by_moves(Piece, [Move | _]) :-  % Can be attacked
     move:delete_pieces(Move, DeletePieces),
 
     % Piece is present inside the move
     memberchk(Piece, DeletePieces), !.
-can_be_attacked_for_moves(Piece, [_ | Moves]) :- % Cannot be attacked
+can_be_attacked_by_moves(Piece, [_ | Moves]) :- % Cannot be attacked
     
     % Recursive call
-    can_be_attacked_for_moves(Piece, Moves), !.
+    can_be_attacked_by_moves(Piece, Moves), !.
 
 
 %! checkmate_or_stalemate/1(+State)

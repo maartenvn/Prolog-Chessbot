@@ -63,7 +63,7 @@ test(color_pieces) :-
 
 
 % check/2: black king should be check
-test(check__true) :-
+test(check__true, [nondet]) :-
 
     % List with pieces
     Pieces = [piece(black, king, 1/1), piece(white, tower, 1/5)],
