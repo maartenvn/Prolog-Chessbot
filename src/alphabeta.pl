@@ -72,12 +72,12 @@ cut(Player, State, Score, _, _, _, _, UpperBound, State, Score) :-              
     max(State, Player),
 
     % Cut-off the branch if the score is larger than the upperbound
-    Score >= UpperBound.
+    Score >= UpperBound, !.
 cut(Player, State, Score, _, _, _, LowerBound, _, State, Score) :-                                                   % Minimizing player, cut-off
     min(State, Player),
 
     % Cut-off the branch if the score is larger than the upperbound
-    Score =< LowerBound.
+    Score =< LowerBound, !.
 cut(Player, State1, Score1, OtherStates, TraversedDepth, MaxDepth, LowerBound, UpperBound, BestState, BestScore) :-  % Continue evaluation
 
     % Update upper/lower bound
@@ -101,7 +101,7 @@ update_bounds(Player, State, Score, LowerBound, UpperBound, Score, UpperBound) :
     max(State, Player),
 
     % Score must be larger than the lowerbound.
-    Score > LowerBound.
+    Score > LowerBound, !.
 
 % Update the upperbound to the current score if:
 % * Current player is minimizing player
@@ -110,7 +110,7 @@ update_bounds(Player, State, Score, LowerBound, UpperBound, LowerBound, Score) :
     min(State, Player),
 
     % Score must be larger than the lowerbound.
-    Score < UpperBound.
+    Score < UpperBound, !.
 
 % Base case
 update_bounds(_, _, _, LowerBound, UpperBound, LowerBound, UpperBound).
