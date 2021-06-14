@@ -13,7 +13,7 @@
 alphabeta(Player, CurrentState, MaxDepth, MaxDepth, _, _, CurrentState, BestScore) :-                       % Leaf: maximum depth is reached
    
     % Calculate the score for the current state
-    score(Player, CurrentState, MaxDepth, MaxDepth, BestScore), !.
+    score(Player, CurrentState, MaxDepth, MaxDepth, BestScore).
     
 alphabeta(Player, CurrentState, TraversedDepth, MaxDepth, LowerBound, UpperBound, BestState, BestScore) :-  % Continue building the game tree
 
@@ -39,19 +39,19 @@ alphabeta(Player, CurrentState, TraversedDepth, MaxDepth, _, _, CurrentState, Be
     state:check(CurrentState, CheckmatePlayer),
 
     % Calculate the score fot the current state.
-    score_checkmate(Player, CheckmatePlayer, TraversedDepth, MaxDepth, BestScore), !.
+    score_checkmate(Player, CheckmatePlayer, TraversedDepth, MaxDepth, BestScore).
 
 alphabeta(Player, CurrentState, _, _, _, _, none, BestScore) :-                             % Leaf: a player is stalemate
     state:currentcolor(CurrentState, StalematePlayer),
 
     % Calculate the score fot the current state.
-    score_stalemate(Player, StalematePlayer, BestScore), !.
+    score_stalemate(Player, StalematePlayer, BestScore).
 
 
 %! best(+Player, +States, +TraversedDepth, +MaxDepth, +LowerBound, +UpperBound, -BestState, -BestScore)
 %
 %  Best state in a given list of states.
-best(_, [], _, _, _, _, _, _) :- !.                                                                                % Base case
+best(_, [], _, _, _, _, _, _).                                                                                     % Base case
 
 best(Player, [State], TraversedDepth, MaxDepth, LowerBound, UpperBound, State, Score) :-                           % Single state, return state
 
@@ -74,13 +74,13 @@ cut(Player, State, Score, _, _, _, _, UpperBound, State, Score) :-              
     max(State, Player),
 
     % Cut-off the branch if the score is larger than the upperbound
-    Score >= UpperBound, !.
+    Score >= UpperBound.
 
 cut(Player, State, Score, _, _, _, LowerBound, _, State, Score) :-                                                   % Minimizing player, cut-off
     min(State, Player),
 
     % Cut-off the branch if the score is larger than the upperbound
-    Score =< LowerBound, !.
+    Score =< LowerBound.
 
 cut(Player, State1, Score1, OtherStates, TraversedDepth, MaxDepth, LowerBound, UpperBound, BestState, BestScore) :-  % Continue evaluation
 
@@ -91,7 +91,7 @@ cut(Player, State1, Score1, OtherStates, TraversedDepth, MaxDepth, LowerBound, U
     best(Player, OtherStates, TraversedDepth, MaxDepth, NewLowerBound, NewUpperBound, State2, Score2),
 
     % Determin the best state of the 2 states
-    best_of(Player, State1, State2, Score1, Score2, BestState, BestScore), !.
+    best_of(Player, State1, State2, Score1, Score2, BestState, BestScore).
 
 
 %! update_bounds(+Player, +State, +Score, +LowerBound, +UpperBound, -NewLowerBound, -NewUpperBound)
@@ -105,7 +105,7 @@ update_bounds(Player, State, Score, LowerBound, UpperBound, Score, UpperBound) :
     max(State, Player),
 
     % Score must be larger than the lowerbound.
-    Score > LowerBound, !.
+    Score > LowerBound.
 
 % Update the upperbound to the current score if:
 % * Current player is minimizing player
@@ -114,10 +114,10 @@ update_bounds(Player, State, Score, LowerBound, UpperBound, LowerBound, Score) :
     min(State, Player),
 
     % Score must be larger than the lowerbound.
-    Score < UpperBound, !.
+    Score < UpperBound.
 
 % Base case
-update_bounds(_, _, _, LowerBound, UpperBound, LowerBound, UpperBound) :- !.
+update_bounds(_, _, _, LowerBound, UpperBound, LowerBound, UpperBound).
 
 
 %! best_of(+Player, +State1, +State2, +Score1, +Score2, -BestState, -BestScore)
@@ -131,8 +131,7 @@ best_of(Player, State1, _, Score1, Score2, BestState, BestScore) :- % Maximizing
 
     % Update best state
     BestState = State1,
-    BestScore = Score1,
-    !.
+    BestScore = Score1.
 
 best_of(Player, _, State2, Score1, Score2, BestState, BestScore) :- % Maximizing player (Score 2 is largest)
     max(State2, Player),
@@ -142,8 +141,7 @@ best_of(Player, _, State2, Score1, Score2, BestState, BestScore) :- % Maximizing
 
     % Update best state
     BestState = State2,
-    BestScore = Score2,
-    !.
+    BestScore = Score2.
 
 best_of(Player, State1, _, Score1, Score2, BestState, BestScore) :- % Minimizing player (Score 1 is smallest)
     min(State1, Player),
@@ -153,8 +151,7 @@ best_of(Player, State1, _, Score1, Score2, BestState, BestScore) :- % Minimizing
 
     % Update best state
     BestState = State1,
-    BestScore = Score1,
-    !.
+    BestScore = Score1.
 
 best_of(Player, _, State2, Score1, Score2, BestState, BestScore) :- % Minimizing player (Score 2 is smallest)
     min(State2, Player),
@@ -164,8 +161,7 @@ best_of(Player, _, State2, Score1, Score2, BestState, BestScore) :- % Minimizing
 
     % Update best state
     BestState = State2,
-    BestScore = Score2,
-    !.
+    BestScore = Score2.
 
 
 %! max(+State, +Player)
@@ -275,7 +271,7 @@ score_checkmate(Player, CheckmatePlayer, TraversedDepth, MaxDepth, Score) :-
 %! score_stalemate(+Player, +StalematePlayer, -Score)
 %
 %  Score when a given state is stalemate.
-score_stalemate(_, _, 0) :- !.
+score_stalemate(_, _, 0).
 
 
 %! score_pieces(+Pieces, -Score)
@@ -291,8 +287,8 @@ score_pieces([Piece | Pieces], Score) :-
     score_pieces(Pieces, PiecesScore),
 
     % Add the scores together
-    Score is PieceScore + PiecesScore, !.
-score_pieces([], 0) :- !.
+    Score is PieceScore + PiecesScore.
+score_pieces([], 0).
 
 
 %! score_piece(+Piece, -Score)
@@ -301,16 +297,16 @@ score_pieces([], 0) :- !.
 %  Scores are based on the values recommended by Hans Berliner's system (World Correspondence Chess Champion)
 
 % Queen
-score_piece(piece(_, queen, _), 8.8) :- !.
+score_piece(piece(_, queen, _), 8.8).
 
 % Tower
-score_piece(piece(_, tower, _), 5.1) :- !.
+score_piece(piece(_, tower, _), 5.1).
 
 % Bishop
-score_piece(piece(_, bishop, _), 3.33) :- !.
+score_piece(piece(_, bishop, _), 3.33).
 
 % Horse
-score_piece(piece(_, horse, _), 3.2)  :- !.
+score_piece(piece(_, horse, _), 3.2).
 
 % Pawn
 score_piece(piece(white, pawn, X/Y), Score) :-    % white: Get score from pawn table
@@ -322,7 +318,7 @@ score_piece(piece(white, pawn, X/Y), Score) :-    % white: Get score from pawn t
     nth0(Y, ScoringTable, Row),
 
     % Score
-    nth0(X, Row, Score), !.
+    nth0(X, Row, Score).
 
 score_piece(piece(black, pawn, X/Y), Score) :-    % black: Get score from pawn table
     XRev is 8 - X,
@@ -335,12 +331,12 @@ score_piece(piece(black, pawn, X/Y), Score) :-    % black: Get score from pawn t
     nth0(YRev, ScoringTable, Row),
 
     % Score
-    nth0(XRev, Row, Score), !.
+    nth0(XRev, Row, Score).
 
-score_piece(piece(_, pawn, _), 1) :- !.          % Default value
+score_piece(piece(_, pawn, _), 1).                % Default value
 
 % Default
-score_piece(piece(_, _, _), 0) :- !.
+score_piece(piece(_, _, _), 0).
 
 
 %! score_pawn_table(+ScoringTable)
