@@ -4,7 +4,7 @@
 
 
 % row_pieces/3
-test(row_pieces) :-
+test(row_pieces, [nondet]) :-
     Piece1 = piece(white, horse, 1/4),
     Piece2 = piece(white, horse, 3/1),
     Piece3 = piece(white, horse, 3/4),
@@ -22,7 +22,7 @@ test(row_pieces) :-
 
 
 % sorted_pieces/3
-test(sorted_pieces) :-
+test(sorted_pieces, [nondet]) :-
     Piece1 = piece(white, horse, 3/4),
     Piece2 = piece(white, horse, 1/4),
     state:create_state([Piece1, Piece2], white, [], none, State),

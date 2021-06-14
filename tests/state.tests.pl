@@ -3,7 +3,7 @@
 
 
 % piece_at_position/3: piece at position
-test(piece_at_position__true) :-
+test(piece_at_position__true, [nondet]) :-
 
     % List with pieces
     Pieces = [piece(white, tower, 6/3), piece(black, king, 3/3)],
@@ -16,7 +16,7 @@ test(piece_at_position__true) :-
 
 
 % piece_at_position/3: no piece at position
-test(piece_at_position__false) :-
+test(piece_at_position__false, [nondet]) :-
 
     % List with pieces
     Pieces = [piece(white, tower, 6/3), piece(black, king, 3/3)],
@@ -29,7 +29,7 @@ test(piece_at_position__false) :-
 
 
 % pieces/2: all pieces should be returned
-test(pieces) :-
+test(pieces, [nondet]) :-
 
     % List with pieces
     Pieces = [piece(black, king, 1/1), piece(white, tower, 4/5), piece(black, king, 3/3), piece(white, tower, 1/5)],
@@ -47,7 +47,7 @@ test(pieces) :-
 
 
 % color_pieces/3: all white pieces should be returned
-test(color_pieces) :-
+test(color_pieces, [nondet]) :-
 
     % List with pieces
     Pieces = [piece(black, king, 1/1), piece(white, tower, 4/5), piece(black, king, 3/3), piece(white, tower, 1/5)],
@@ -63,7 +63,7 @@ test(color_pieces) :-
 
 
 % check/2: black king should be check
-test(check__true) :-
+test(check__true, [nondet]) :-
 
     % List with pieces
     Pieces = [piece(black, king, 1/1), piece(white, tower, 1/5)],
@@ -76,7 +76,7 @@ test(check__true) :-
 
 
 % check/2: white king should not be check
-test(check__false) :-
+test(check__false, [nondet]) :-
 
     % List with pieces
     Pieces = [piece(black, king, 1/1), piece(white, king, 1/5)],
