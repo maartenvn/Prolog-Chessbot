@@ -87,4 +87,28 @@ test(check__false) :-
     % Assert
     not(state:check(State, white)).
 
+% checkmate_or_stalemate/1: black king should be checkmate
+test(checkmate_or_stalemate__true, [nondet]) :-
+
+    % List with pieces
+    Pieces = [piece(white, tower, 2/8), piece(white, tower, 1/7), piece(white, king, 4/1), piece(black, king, 8/8)],
+
+    % State
+    state:create_state(Pieces, black, [], none, State),
+
+    % Assert
+    state:checkmate_or_stalemate(State).
+
+% checkmate_or_stalemate/1: white king should not be checkmate
+test(checkmate_or_stalemate__false, [nondet]) :-
+
+    % List with pieces
+    Pieces = [piece(white, tower, 2/8), piece(white, tower, 1/7), piece(white, king, 4/1), piece(black, king, 8/8)],
+
+    % State
+    state:create_state(Pieces, white, [], none, State),
+
+    % Assert
+    not(state:checkmate_or_stalemate(State)).
+
 :- end_tests(state).

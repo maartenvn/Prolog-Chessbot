@@ -182,7 +182,7 @@ king(State, Color, King) :-
 %  Helper predicate for king/3
 king([Position | _], State, Color, King) :-
     % King Piece
-    King = piece(Color, king, _),
+    King = piece(Color, king, Position),
 
     % Piece at the current position is the king
     piece_at_position(State, Position, King).
@@ -345,10 +345,10 @@ set_color(State, Color, NewState) :-
 check(State, Color) :-
 
     % Retrieve the king from the board
-    king(State, Color, KingPiece), !,
+    state:king(State, Color, KingPiece), !,
 
     % Check if any opponent piece can attack the king of the given color
-    can_be_attacked(KingPiece, State).
+    state:can_be_attacked(KingPiece, State).
 
 
 %! can_be_attacked/2(+Piece, +State)
@@ -379,3 +379,43 @@ can_be_attacked_for_moves(Piece, [_ | Moves]) :- % Cannot be attacked
     
     % Recursive call
     can_be_attacked_for_moves(Piece, Moves), !.
+
+
+%! checkmate_or_stalemate/1(+State)
+%
+%  If a given state is checkmate or stalemate for the current player.
+%  Will check if the current player cannot do any more moves.
+checkmate_or_stalemate(State) :-
+    state:currentcolor(State, Color),
+
+    % Find all possible positions on the board
+    position:valid_positions(Positions),
+
+    % Helper predicate
+    checkmate_or_stalemate(State, Color, Positions).
+
+%! checkmate_or_stalemate/3(+State, +Color +Positions)
+%
+%  Helper predicate for checkmate_or_stalemate/1
+checkmate_or_stalemate(_, _, []).
+checkmate_or_stalemate(State, Color, [Position | Positions]) :-     % Piece at position is of given color
+    Piece = piece(Color, _, Position),
+
+    % Piece at the current position
+    piece_at_position(State, Position, Piece),
+
+    % All possible moves for the current piece.
+    move:possible_moves(Piece, State, PseudoMoves),
+
+    % All possible valid moves for the current piece should be empty.
+    move:valid_moves(State, PseudoMoves, []),
+
+    % Recursive call.
+    checkmate_or_stalemate(State, Color, Positions).
+checkmate_or_stalemate(State, Color, [Position | Positions]) :-              % Piece at position is not of given color or none
+
+    % Position is of opponent or empty
+    position:empty_or_opponent_position(Position, Color, State),
+
+    % Recursive call.
+    checkmate_or_stalemate(State, Color, Positions).

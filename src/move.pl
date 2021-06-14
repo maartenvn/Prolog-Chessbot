@@ -108,6 +108,40 @@ all_possible_moves_for_pieces([Piece | Pieces], State, Moves) :-
     append(PieceMoves, RestMoves, Moves), !.
 all_possible_moves_for_pieces([], _, []).
 
+%! valid_move(+State, +Move)
+%
+%  If a given move is valid.
+%  A move is considered invalid if it causes a check.
+valid_move(State, Move) :-
+    state:currentcolor(State, CurrentColor),
+
+    % Do the move and retrieve the new state
+    move:do_move(Move, State, NextState),
+
+    % State is check
+    not(state:check(NextState, CurrentColor)).
+
+
+%! valid_moves(+State, +Moves, ?ValidMoves)
+%
+%  Filter a given list of moves by removing all moves that lead to a check of the current color.
+valid_moves(_, [], []).
+valid_moves(State, [Move | Moves], ValidMoves) :-  % Move is valid
+
+    % Check if move is valid
+    % This cut operator is to prevent having to use "not(valid_move(...))" in the
+    % next predicate. This is for performance reasons.
+    valid_move(State, Move), !,
+
+    % Assign the valid move
+    ValidMoves = [Move | ValidMovesRest],
+
+    % Recursive call
+    valid_moves(State, Moves, ValidMovesRest).
+valid_moves(State, [_ | Moves], ValidMoves) :-              % Move is invalid
+    % Recursive call
+    valid_moves(State, Moves, ValidMoves).
+
 
 %! possible_moves(+Piece, +State, -Moves)
 %

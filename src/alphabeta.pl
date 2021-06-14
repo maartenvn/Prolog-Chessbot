@@ -192,8 +192,8 @@ min(State, Player) :-
 
 score(Player, State, TraversedDepth, MaxDepth, Score) :- % Checkmate or stalemate
 
-    % Make sure the player cannot do any more moves
-    state:all_possible_states(State, []),
+    % Player cannot do any more moves
+    state:checkmate_or_stalemate(State),
 
     % Checkmate or stalemate
     score_checkmate_or_stalemate(Player, State, TraversedDepth, MaxDepth, Score).
